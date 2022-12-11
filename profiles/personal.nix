@@ -4,6 +4,7 @@ let
   # Custom stuff
   imports = [
     ../apps/zsh.nix
+    ../apps/astronvim.nix
   ];
 in
 {
