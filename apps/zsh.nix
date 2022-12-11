@@ -14,7 +14,7 @@
       home-switch = "home-manager switch -f $HOME/.nix/profiles/personal.nix -b backup";
 
       grep = "rg $@";
-      ls = "exa --long --tree $@";
+      ls = "exa --tree $@";
       cat = "bat $@";
     };
 

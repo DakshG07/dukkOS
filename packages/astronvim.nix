@@ -15,11 +15,7 @@ with lib; let
   };
 in {
   options.astronvim = {
-    enable = mkOption {
-      default = false;
-      description = "Enables AstroNvim";
-      type = types.bool;
-    };
+    enable = mkEnableOption "AstroNvim";
 
     userConfig = mkOption {
       default = null;
@@ -27,7 +23,7 @@ in {
       type = with types; nullOr path;
     };
   };
-  config = mkIf (cfg.enable) {
+  config = mkIf cfg.enable {
     home = {
       file = {
         ".local/share/nvim/site/pack/packer/start/packer.nvim" = {

@@ -2,7 +2,7 @@
 
 let
   imports = [
-    ../packages/astro.nix
+    ../packages/astronvim.nix
   ];
 in {
   inherit imports;
