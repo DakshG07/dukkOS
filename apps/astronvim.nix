@@ -6,7 +6,7 @@ let
   ];
 in {
   inherit imports;
-  options.astronvim = {
+  astronvim = {
     enable = true;
     userConfig = ../config/nvim;
   };

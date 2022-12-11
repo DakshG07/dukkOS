@@ -1,17 +1,17 @@
 { config, pkgs, lib, ... }:
 with lib; let
   cfg = config.astronvim;
-  astronvim = pkgs.fetchFromGithub {
+  astronvim = pkgs.fetchFromGitHub {
     owner = "AstroNvim";
     repo = "AstroNvim";
     rev = "176265812355a53559497c0f0ada7ab62a2d1ba8";
-    sha256 = "6a1f78fecb99bc19daef8282f96274dc64f9fa2832185a09ef81d85c68e2b845";
+    sha256 = "sha256-uiEyCC0a16h9qqcluKp2TvADQd2yfdFMuBW2hqA2ZAw=";
   };
-  packer = pkgs.fetchFromGithub {
+  packer = pkgs.fetchFromGitHub {
     owner = "wbthomason";
     repo = "packer.nvim";
     rev = "64ae65fea395d8dc461e3884688f340dd43950ba";
-    sha256 = "dbac4dc9c8c18b3b64e3e520ee0c7249ab993755d4f23ee4d2c8915988ab9dae";
+    sha256 = "sha256-ra9qlUD0x1S3Q4WFN6f56FscHR/ZmTRDQ9yg+ETt3oA=";
   };
 in {
   options.astronvim = {
