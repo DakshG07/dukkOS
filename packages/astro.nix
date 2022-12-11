@@ -23,7 +23,7 @@ in {
 
     userConfig = mkOption {
       default = null;
-      description = "AstroNvim user config directory"
+      description = "AstroNvim user config directory";
       type = with types; nullOr path;
     };
   };

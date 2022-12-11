@@ -5,6 +5,7 @@ let
     ../packages/astro.nix
   ];
 in {
+  inherit imports;
   options.astronvim = {
     enable = true;
     userConfig = ../config/nvim;
