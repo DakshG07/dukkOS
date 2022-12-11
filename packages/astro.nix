@@ -12,6 +12,7 @@ with lib; let
     repo = "packer.nvim";
     rev = "64ae65fea395d8dc461e3884688f340dd43950ba";
     sha256 = "dbac4dc9c8c18b3b64e3e520ee0c7249ab993755d4f23ee4d2c8915988ab9dae";
+  };
 in {
   options.astronvim = {
     enable = mkOption {
