@@ -9,7 +9,6 @@ in
     "${modulesPath}/profiles/minimal.nix"
 
     nixos-wsl.nixosModules.wsl
-    <home-manager/nixos>
   ];
 
   wsl = {

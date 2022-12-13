@@ -5,6 +5,7 @@ let
   imports = [
     ../apps/zsh.nix
     ../apps/astronvim.nix
+    ../apps/starship.nix
   ];
 in
 {
@@ -21,11 +22,9 @@ in
       exa
       ripgrep
       lazygit
+      starship
       gh
     ];
-    file = {
-      "~/.config/starship.toml".source = ../config/starship.toml;
-    };
     stateVersion = "22.05";
   };
   
