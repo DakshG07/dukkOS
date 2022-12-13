@@ -6,7 +6,7 @@ Follow the instructions [here](https://github.com/nix-community/NixOS-WSL) to in
 
 ```bash
 $ sudo passwd nixos
-$ nix-env -i git
+$ nix-shell -p git
 $ git clone https://DakshG07/nix-stuff ~/.nix
 $ cd ~/.nix
 $ chmod +x install.sh
