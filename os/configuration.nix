@@ -16,6 +16,7 @@ in
     automountPath = "/mnt";
     defaultUser = "dukk";
     startMenuLaunchers = false;
+    nativeSystemd = true;
 
     # Enable native Docker support
     # docker-native.enable = true;
