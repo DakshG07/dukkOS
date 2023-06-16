@@ -12,11 +12,9 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
-  # NTFS support
-  boot.supportedFilesystems = [ "ntfs" ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/61ae386f-000f-4bcc-b02b-da717de29c50";
+    { device = "/dev/disk/by-uuid/8888c735-5c32-4ade-9add-4cb5b96e5292";
       fsType = "ext4";
     };
 
@@ -24,12 +22,6 @@
     { device = "/dev/disk/by-uuid/CE9C-8878";
       fsType = "vfat";
     };
-
-  #fileSystems."/stuff" =
-  #  { device = "/dev/sda1";
-  #    fsType = "ntfs3";
-  #    options = [ "rw" "uid=1000"];
-  #  };
 
   swapDevices = [ ];
 
@@ -45,3 +37,4 @@
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
+

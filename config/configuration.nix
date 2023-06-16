@@ -17,12 +17,6 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # Enable NTFS support
   boot.supportedFilesystems = [ "ntfs" ];
-  fileSystems."/stuff" =
-    { device = "/dev/sda1";
-      fsType = "ntfs3"; 
-      options = [ "rw" "uid=1000"];
-    };
-
   networking.hostName = "nixos"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -54,9 +48,9 @@
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
-  # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome.enable = true;
+  # Enable the KDE Plasma Desktop Environment.
+  services.xserver.displayManager.sddm.enable = true;
+  services.xserver.desktopManager.plasma5.enable = true;
 
   # Configure keymap in X11
   services.xserver = {
@@ -104,10 +98,6 @@
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
   ];
-
-  environment.gnome.excludePackages = (with pkgs; [
-    xdg-desktop-portal-gnome
-  ]);
 
 
   # This value determines the NixOS release from which the default
