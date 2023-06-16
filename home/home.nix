@@ -20,10 +20,14 @@ in
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
+    # Tools
+    nodejs
     # CLIs
     gh
     git
     neofetch
+    lazygit
+    wifish
     # Editors
     neovim
     # GUIs
@@ -31,6 +35,7 @@ in
     wezterm
     thunderbird
     obsidian
+    wofi
     # Fonts
     recursive
   ];
