@@ -1,8 +1,8 @@
 { config, lib, ...}:
 with lib; let
-  cfg = config.wezterm;
+  cfg = config.dotfiles.wezterm;
 in {
-  options.wezterm = {
+  options.dotfiles.wezterm = {
     enable = mkEnableOption "Wezterm";
   };
 

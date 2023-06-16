@@ -1,9 +1,11 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, hyprland, ... }:
 
 let
   # Custom configs
   imports = [
     ../apps/wezterm.nix
+    ../apps/hyprland.nix
+    hyprland.homeManagerModules.default
   ];
 in
 {
@@ -28,16 +30,23 @@ in
     firefox
     wezterm
     thunderbird
+    obsidian
     # Fonts
     recursive
   ];
 
   # Custom configs
-  wezterm.enable = true;
+  dotfiles = {
+    wezterm.enable = true;
+    hyprland.enable = true;
+  };
 
   home.sessionVariables = {
     EDITOR = "nvim";
   };
+
+  # Hyprland
+  wayland.windowManager.hyprland.enable = true;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
