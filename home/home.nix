@@ -5,6 +5,7 @@ let
   imports = [
     ../apps/wezterm.nix
     ../apps/hyprland.nix
+    ../apps/nvim.nix
     hyprland.homeManagerModules.default
   ];
 in
@@ -22,12 +23,13 @@ in
   home.packages = with pkgs; [
     # Tools
     nodejs
+    swww
+    zig
     # CLIs
     gh
     git
     neofetch
     lazygit
-    wifish
     # Editors
     neovim
     # GUIs
@@ -36,6 +38,7 @@ in
     thunderbird
     obsidian
     wofi
+    wdisplays
     # Fonts
     recursive
   ];
@@ -44,6 +47,7 @@ in
   dotfiles = {
     wezterm.enable = true;
     hyprland.enable = true;
+    nvim.enable = true;
   };
 
   home.sessionVariables = {
