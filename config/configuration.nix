@@ -24,6 +24,9 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
+  # Enable polkit
+  security.polkit.enable = true;
+
   # Enable networking
   networking.networkmanager.enable = true;
 
@@ -88,6 +91,23 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [];
   };
+
+  systemd = {
+    user.services.polkit-gnome-authentication-agent-1 = {
+      description = "polkit-gnome-authentication-agent-1";
+      wantedBy = [ "graphical-session.target" ];
+      wants = [ "graphical-session.target" ];
+      after = [ "graphical-session.target" ];
+      serviceConfig = {
+          Type = "simple";
+          ExecStart = "${pkgs.polkit_gnome}/libexec/polkit-gnome-authentication-agent-1";
+          Restart = "on-failure";
+          RestartSec = 1;
+          TimeoutStopSec = 10;
+        };
+    };
+  };
+
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

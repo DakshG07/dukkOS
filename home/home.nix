@@ -25,11 +25,15 @@ in
     nodejs
     swww
     zig
+    libnotify
+    polkit_gnome
     # CLIs
     gh
     git
     neofetch
     lazygit
+    just
+    nushell
     # Editors
     neovim
     # GUIs
@@ -39,6 +43,9 @@ in
     obsidian
     wofi
     wdisplays
+    eww-wayland
+    dunst
+    swaylock
     # Fonts
     recursive
   ];
@@ -56,6 +63,9 @@ in
 
   # Hyprland
   wayland.windowManager.hyprland.enable = true;
+
+  # Nushell
+  programs.nushell.enable = true;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
