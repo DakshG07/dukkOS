@@ -1,15 +1,16 @@
-{ config, lib, ...}:
+{ config, lib, flakePath, ...}:
 with lib; let
   cfg = config.dotfiles.wezterm;
+  link = config.lib.file.mkOutOfStoreSymlink;
 in {
   options.dotfiles.wezterm = {
     enable = mkEnableOption "Wezterm";
   };
 
   config = mkIf cfg.enable {
-    home.file.".config/wezterm" = {
+    xdg.configFile."wezterm" = {
       recursive = true;
-      source = ./wezterm;
+      source = link "${flakePath}/apps/wezterm";
     };
   };
 }

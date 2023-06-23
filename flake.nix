@@ -24,23 +24,23 @@
         system = "x86_64-linux";
         specialArgs = attrs;
         modules = [ 
-	  ./config/configuration.nix
-	  home-manager.nixosModules.home-manager
-	  {
-	    home-manager.useGlobalPkgs = true;
-	    home-manager.useUserPackages = true;
-	    home-manager.extraSpecialArgs = {
-        inherit (attrs) nixpkgs hyprland;
-        flakePath = "/home/dukk/.nix";
-      };
-	    home-manager.users.dukk = import ./home/home.nix;
-	  }
+          ./config/configuration.nix
+          home-manager.nixosModules.home-manager
+          ({config, ...}:{
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {
+              inherit (attrs) nixpkgs hyprland;
+              flakePath = "/home/dukk/.nix";
+            };
+            home-manager.users.dukk = import ./home/home.nix;
+          })
           hyprland.nixosModules.default
-	  {
-	    programs.hyprland.enable = true;
-	    programs.hyprland.nvidiaPatches = true;
-	  }
-	];
+          {
+            programs.hyprland.enable = true;
+            programs.hyprland.nvidiaPatches = true;
+          }
+        ];
       };
     };
 }

@@ -36,12 +36,13 @@ pcall(require, "plugins")
 vim.g.catppuccin_flavour = "mocha"
 vim.cmd.colorscheme "catppuccin"
 -- Keymaps
-vim.keymap.set("n", "L", "<cmd>BufferLineCycleNext<CR>")
-vim.keymap.set("n", "H", "<cmd>BufferLineCyclePrev<CR>")
-vim.keymap.set("n", ">b", "<cmd>BufferLineMoveNext<CR>")
-vim.keymap.set("n", "<b", "<cmd>BufferLineMovePrev<CR>")
-vim.keymap.set("n", "<leader>bp", "<cmd>BufferLinePick<CR>")
-vim.keymap.set("n", "<leader>c", "<cmd>bdelete<CR>")
+vim.keymap.set("n", "L", "<cmd>BufferLineCycleNext<CR>")     -- Next buffer
+vim.keymap.set("n", "H", "<cmd>BufferLineCyclePrev<CR>")     -- Prev buffer
+vim.keymap.set("n", ">b", "<cmd>BufferLineMoveNext<CR>")     -- Move buffer ->
+vim.keymap.set("n", "<b", "<cmd>BufferLineMovePrev<CR>")     -- Move buffer <-
+vim.keymap.set("n", "<leader>bp", "<cmd>BufferLinePick<CR>") -- Pick buffer
+vim.keymap.set("n", "<leader>c", "<cmd>bdelete<CR>")         -- Close buffer
+vim.keymap.set("n", "<leader>hc", "<cmd>noh<CR>")            -- Clear highlight
 -- Telescope
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files)

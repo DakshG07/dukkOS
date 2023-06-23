@@ -8,6 +8,9 @@ in {
   };
 
   config = mkIf cfg.enable {
+    # Delete default Hyprland-generated config
+    xdg.configFile."hypr/hyprland.conf".enable = false;
+    # Load in our config
     xdg.configFile."hypr" = {
       source = link "${flakePath}/apps/hyprland";
       recursive = true;
