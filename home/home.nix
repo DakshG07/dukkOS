@@ -30,6 +30,7 @@ in
     polkit_gnome
     bluez
     direnv
+    wl-clipboard
     # CLIs
     gh
     git
