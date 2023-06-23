@@ -6,6 +6,7 @@ let
     ../apps/wezterm.nix
     ../apps/hyprland.nix
     ../apps/nvim.nix
+    ../apps/nushell.nix
     hyprland.homeManagerModules.default
   ];
 in
@@ -27,6 +28,8 @@ in
     zig
     libnotify
     polkit_gnome
+    bluez
+    direnv
     # CLIs
     gh
     git
@@ -34,6 +37,8 @@ in
     lazygit
     just
     nushell
+    zoxide
+    fzf
     # Editors
     neovim
     # GUIs
@@ -46,6 +51,10 @@ in
     eww-wayland
     dunst
     swaylock
+    blueman
+    gnome.nautilus
+    grim
+    slurp
     # Fonts
     recursive
   ];
@@ -55,6 +64,7 @@ in
     wezterm.enable = true;
     hyprland.enable = true;
     nvim.enable = true;
+    nushell.enable = true;
   };
 
   home.sessionVariables = {
@@ -66,6 +76,23 @@ in
 
   # Nushell
   programs.nushell.enable = true;
+
+  # Direnv
+  programs.direnv.enable = true;
+
+  # GTK
+  gtk = {
+    enable = true;
+    theme = {
+      name = "Catppuccin-Macchiato-Compact-Mauve-Dark";
+      package = pkgs.catppuccin-gtk.override {
+        accents = [ "mauve" ];
+        size = "compact";
+        tweaks = [ "rimless" "black" ];
+        variant = "macchiato";
+      };
+    };
+  };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;

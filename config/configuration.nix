@@ -18,6 +18,10 @@
   # Enable NTFS support
   boot.supportedFilesystems = [ "ntfs" ];
   networking.hostName = "nixos"; # Define your hostname.
+
+  # Bluetooth support
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -90,6 +94,7 @@
     description = "Daksh Gupta";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [];
+    shell = pkgs.nushell;
   };
 
   systemd = {
@@ -108,6 +113,9 @@
     };
   };
 
+  # Custom shell
+  environment.shells = with pkgs; [ nushell ];
+
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -118,6 +126,7 @@
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
   ];
+
 
 
   # This value determines the NixOS release from which the default
