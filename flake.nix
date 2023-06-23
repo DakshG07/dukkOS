@@ -29,7 +29,11 @@
 	  {
 	    home-manager.useGlobalPkgs = true;
 	    home-manager.useUserPackages = true;
-	    home-manager.extraSpecialArgs = attrs;
+      home-manager.homeDirectory = "/home/dukk";
+	    home-manager.extraSpecialArgs = {
+        inherit (attrs) nixpkgs hyprland;
+        flakePath = "/home/dukk/.nix";
+      };
 	    home-manager.users.dukk = import ./home/home.nix;
 	  }
           hyprland.nixosModules.default
