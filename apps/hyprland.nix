@@ -9,8 +9,8 @@ in {
 
   config = mkIf cfg.enable {
     xdg.configFile."hypr" = {
+      source = link "${flakePath}/apps/hyprland";
       recursive = true;
-      source = link "${flakePath}/hyprland";
     };
   };
 }
