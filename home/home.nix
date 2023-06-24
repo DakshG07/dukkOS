@@ -56,6 +56,7 @@ in
     gnome.nautilus
     grim
     slurp
+    audacity
     # Fonts
     recursive
   ];
@@ -89,7 +90,7 @@ in
       package = pkgs.catppuccin-gtk.override {
         accents = [ "mauve" ];
         size = "compact";
-        tweaks = [ "rimless" "black" ];
+        tweaks = [ "rimless" ];
         variant = "macchiato";
       };
     };

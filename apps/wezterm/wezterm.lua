@@ -1,12 +1,5 @@
 local wezterm = require("wezterm")
 
-local custom = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
-custom.background = "#000000"
-custom.tab_bar.background = "#040404"
-custom.tab_bar.inactive_tab.bg_color = "#0f0f0f"
-custom.tab_bar.new_tab.bg_color = "#080808"
-
-
 -- fonts I like, with the settings I prefer
 -- kept seperately from the rest of the config so that I can easily change them
 local fonts = {
@@ -63,11 +56,8 @@ return {
 		top = 4,
 		bottom = 4,
 	},
-	-- theme
-  color_schemes = {
-    ["OLEDppuccin"] = custom,
-  },
-	color_scheme = "OLEDppuccin",
+	color_scheme = "Catppuccin Mocha",
+  --window_background_opacity = 0.9,
 	-- nightly only
 	clean_exit_codes = { 130 },
 	keys = {

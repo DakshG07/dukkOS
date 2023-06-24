@@ -8,9 +8,8 @@ local plugins =  {
       require("catppuccin").setup({
         color_overrides = {
           mocha = {
-            base = "#000000",
-            mantle = "#000000",
-            crust = "#000000",
+            mantle = "#1e1e2e",
+            crust = "#1e1e2e",
           },
         }
       })
