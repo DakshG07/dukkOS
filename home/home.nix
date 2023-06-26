@@ -31,6 +31,8 @@ in
     bluez
     direnv
     wl-clipboard
+    ffmpeg
+    xdg-desktop-portal-gtk
     # CLIs
     gh
     git
@@ -40,6 +42,8 @@ in
     nushell
     zoxide
     fzf
+    gnupg
+    pinentry
     # Editors
     neovim
     # GUIs
@@ -57,6 +61,8 @@ in
     grim
     slurp
     audacity
+    vlc
+    kdenlive
     # Fonts
     recursive
   ];
@@ -86,12 +92,12 @@ in
   gtk = {
     enable = true;
     theme = {
-      name = "Catppuccin-Macchiato-Compact-Mauve-Dark";
+      name = "Catppuccin-Mocha-Compact-Mauve-Dark";
       package = pkgs.catppuccin-gtk.override {
         accents = [ "mauve" ];
         size = "compact";
         tweaks = [ "rimless" ];
-        variant = "macchiato";
+        variant = "mocha";
       };
     };
   };
