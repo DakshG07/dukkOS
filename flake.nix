@@ -11,11 +11,15 @@
       url = "github:hyprwm/Hyprland";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    catppuccinifier = {
+      url = "github:DakshG07/catppuccinifier";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   description = "A very basic flake";
 
-  outputs = { self, nixpkgs, home-manager, hyprland, ... }@attrs:
+  outputs = { self, nixpkgs, home-manager, hyprland, catppuccinifier, ... }@attrs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -30,7 +34,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
-              inherit (attrs) nixpkgs hyprland;
+              inherit (attrs) nixpkgs hyprland catppuccinifier;
               flakePath = "/home/dukk/.nix";
             };
             home-manager.users.dukk = import ./home/home.nix;

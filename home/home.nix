@@ -1,4 +1,4 @@
-{ config, pkgs, lib, hyprland, ... }:
+{ config, pkgs, lib, hyprland, catppuccinifier, ... }:
 
 let
   # Custom configs
@@ -43,7 +43,9 @@ in
     zoxide
     fzf
     gnupg
-    pinentry
+    pinentry-qt
+    pfetch
+    catppuccinifier.packages.${pkgs.system}.cli
     # Editors
     neovim
     # GUIs

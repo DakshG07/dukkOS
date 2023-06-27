@@ -15,6 +15,11 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.plymouth = {
+    enable = true;
+    theme = "rings";
+    themePackages = [(pkgs.adi1090x-plymouth-themes.override {selected_themes = ["rings"];})];
+  };
   # Enable NTFS support
   boot.supportedFilesystems = [ "ntfs" ];
   networking.hostName = "nixos"; # Define your hostname.
@@ -98,6 +103,19 @@
   };
 
   systemd = {
+    services.sweetDreams = {
+      enable = true;
+      description = "Sweet Dreams";
+      wantedBy = [ "multi-user.target" ];
+      before = [ "sddm.service" ];
+      serviceConfig = {
+        Type = "simple";
+        ExecStart = "something";
+        Restart = "always";
+        RestartSec = 10;
+        TimeoutStopSec = 20;
+      };
+    };
     user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = [ "graphical-session.target" ];
