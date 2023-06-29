@@ -47,6 +47,10 @@ local plugins =  {
           }
         }
       })
+      lsp.on_attach(function(client, bufnr)
+        lsp.default_keymaps({buffer = bufnr})
+        lsp.buffer_autoformat()
+      end)
       lsp.setup()
       local cmp = require('cmp')
       local cmp_config = lsp.defaults.cmp_config({
