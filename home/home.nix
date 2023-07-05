@@ -7,6 +7,7 @@ let
     ../apps/hyprland.nix
     ../apps/nvim.nix
     ../apps/nushell.nix
+    ../apps/helix.nix
     hyprland.homeManagerModules.default
   ];
 in
@@ -33,6 +34,7 @@ in
     wl-clipboard
     ffmpeg
     xdg-desktop-portal-gtk
+    brightnessctl
     # CLIs
     gh
     git
@@ -46,8 +48,9 @@ in
     pinentry-qt
     pfetch
     catppuccinifier.packages.${pkgs.system}.cli
+    thefuck
     # Editors
-    neovim
+    helix
     # GUIs
     firefox
     wezterm
@@ -75,6 +78,7 @@ in
     hyprland.enable = true;
     nvim.enable = true;
     nushell.enable = true;
+    helix.enable = true;
   };
 
   home.sessionVariables = {
@@ -89,6 +93,23 @@ in
 
   # Direnv
   programs.direnv.enable = true;
+
+  # Neovim
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+
+    viAlias = true;
+    vimAlias = true;
+
+    withNodeJs = true;
+    
+    extraPackages = with pkgs; [
+      nodePackages."@astrojs/language-server"
+      nodePackages.typescript
+      nodePackages.typescript-language-server
+    ];
+  };
 
   # GTK
   gtk = {

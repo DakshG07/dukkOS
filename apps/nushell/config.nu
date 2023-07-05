@@ -545,4 +545,11 @@ let-env config = {
   ]
 }
 source ~/.nix/apps/nushell/zoxide.nu
+alias shoot = with-env {TF_ALIAS: "fuck", PYTHONIOENCODING: "utf-8"} {
+    thefuck (history | last 1 | get command.0)
+}
+alias ilike = git config --global --add safe.directory
+alias gitsign = git config commit.gpgsign
+alias lg = lazygit
+let-env EDITOR = 'nvim'
 pfetch

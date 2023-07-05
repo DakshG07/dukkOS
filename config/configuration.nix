@@ -103,19 +103,19 @@
   };
 
   systemd = {
-    services.sweetDreams = {
-      enable = true;
-      description = "Sweet Dreams";
-      wantedBy = [ "multi-user.target" ];
-      before = [ "sddm.service" ];
-      serviceConfig = {
-        Type = "simple";
-        ExecStart = "something";
-        Restart = "always";
-        RestartSec = 10;
-        TimeoutStopSec = 20;
-      };
-    };
+    #services.sweetDreams = {
+      #enable = true;
+      #description = "Sweet Dreams";
+      #wantedBy = [ "multi-user.target" ];
+      #before = [ "sddm.service" ];
+      #serviceConfig = {
+        #Type = "simple";
+        #ExecStart = "${pkgs.bash} /home/dukk/sweetdreams.sh";
+        #Restart = "always";
+        #RestartSec = 10;
+        #TimeoutStopSec = 20;
+      #};
+    #};
     user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = [ "graphical-session.target" ];
