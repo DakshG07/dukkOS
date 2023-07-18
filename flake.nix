@@ -2,6 +2,7 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
+    newpkgs.url = "nixpkgs/nixos-unstable";
 
     home-manager = {
       url = "github:nix-community/home-manager";
@@ -19,7 +20,7 @@
 
   description = "A very basic flake";
 
-  outputs = { self, nixpkgs, home-manager, hyprland, catppuccinifier, ... }@attrs:
+  outputs = { self, nixpkgs, newpkgs, home-manager, hyprland, catppuccinifier, ... }@attrs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -34,7 +35,8 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
-              inherit (attrs) nixpkgs hyprland catppuccinifier;
+              inherit (attrs) nixpkgs hyprland catppuccinifier newpkgs;
+              inherit system;
               flakePath = "/home/dukk/.nix";
             };
             home-manager.users.dukk = import ./home/home.nix;

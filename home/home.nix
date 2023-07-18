@@ -1,4 +1,4 @@
-{ config, pkgs, lib, hyprland, catppuccinifier, ... }:
+{ config, pkgs, lib, hyprland, catppuccinifier, newpkgs, system, ... }:
 
 let
   # Custom configs
@@ -10,6 +10,7 @@ let
     ../apps/helix.nix
     hyprland.homeManagerModules.default
   ];
+  new = newpkgs.legacyPackages.${system};
 in
 {
   inherit imports;
@@ -54,7 +55,7 @@ in
     # GUIs
     firefox
     wezterm
-    thunderbird
+    new.thunderbird
     obsidian
     wofi
     wdisplays
@@ -68,6 +69,7 @@ in
     audacity
     vlc
     kdenlive
+    vivaldi
     # Fonts
     recursive
   ];
