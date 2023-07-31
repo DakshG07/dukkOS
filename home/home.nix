@@ -36,6 +36,8 @@ in
     ffmpeg
     xdg-desktop-portal-gtk
     brightnessctl
+    unzip
+    ghc
     # CLIs
     gh
     git
@@ -70,6 +72,7 @@ in
     vlc
     kdenlive
     vivaldi
+    gparted
     # Fonts
     recursive
   ];

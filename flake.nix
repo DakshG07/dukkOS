@@ -40,6 +40,7 @@
               flakePath = "/home/dukk/.nix";
             };
             home-manager.users.dukk = import ./home/home.nix;
+            nixpkgs.config.allowUnfree = true;
           })
           hyprland.nixosModules.default
           {
