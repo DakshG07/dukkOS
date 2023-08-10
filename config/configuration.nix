@@ -1,18 +1,19 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# dukk.nix v7
 
 { config, pkgs, ... }:
 
+let 
+  sddm-dukk-theme = pkgs.callPackage ../apps/sddm.nix {};
+in
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [ # scans hardware, i guess
       ./hardware-configuration.nix
     ];
 
-  # Flakes
+  # holy nix
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  # Bootloader.
+  # bootloader
   boot.loader = {
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
@@ -22,11 +23,11 @@
     theme = "rings";
     themePackages = [(pkgs.adi1090x-plymouth-themes.override {selected_themes = ["rings"];})];
   };
-  # Enable NTFS support
+  # ntfs support is a joke
   boot.supportedFilesystems = [ "ntfs" ];
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "nixos"; # too lazy to change this
 
-  # Bluetooth support
+  # bluetooth works #LinuxGoals
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -35,16 +36,17 @@
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
-  # Enable polkit
+  # i enabled polkit, but it never worked :(
   security.polkit.enable = true;
 
-  # Enable networking
+  # for future reference, the commands are nmtui and nmcli
+  # shouldn't have taken me that long to figure that out
   networking.networkmanager.enable = true;
 
-  # Set your time zone.
+  # "god shed his grace of thee..."
   time.timeZone = "America/New_York";
 
-  # Select internationalisation properties.
+  # select internationalisation properties...?
   i18n.defaultLocale = "en_US.UTF-8";
 
   i18n.extraLocaleSettings = {
@@ -59,23 +61,34 @@
     LC_TIME = "en_US.UTF-8";
   };
 
-  # Enable the X11 windowing system.
+  # take that, elon
   services.xserver.enable = true;
 
-  # Enable the KDE Plasma Desktop Environment.
-  services.xserver.displayManager.sddm.enable = true;
+  services.xserver.displayManager.sddm = {
+    enable = true;
+    theme = "corners";
+    settings = {
+      General = { InputMethod = ""; };
+    };
+  };
+  # i prefer gnome but hyprland doesn't (screw xdg-portal-gnome)
   services.xserver.desktopManager.plasma5.enable = true;
+  # trying something new
+  services.xserver.windowManager.xmonad = {
+    enable = true;
+    enableContribAndExtras = true;
+  };
 
-  # Configure keymap in X11
+  # keys
   services.xserver = {
     layout = "us";
     xkbVariant = "";
   };
 
-  # Enable CUPS to print documents.
+  # actually never tested if printing works
   services.printing.enable = true;
 
-  # Enable sound with pipewire.
+  # sound? on linux? #LinuxGoals
   sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -95,7 +108,7 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # yeah, it's me.
   users.users.dukk = {
     isNormalUser = true;
     description = "Daksh Gupta";
@@ -104,7 +117,25 @@
     shell = pkgs.nushell;
   };
 
+  # Nvidia drivers :/
+  hardware.nvidia = {
+
+    # something for wayland idk
+    modesetting.enable = true;
+
+    # who am i, richard stallman?
+    open = false;
+
+    # why not
+    nvidiaSettings = true;
+
+    # hope this works
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
   systemd = {
+    # *delaying boot so that you can see the startup screen for longer*
+    # *failing to even make a systemd service work*
+    # maybe i should use void instead
     #services.sweetDreams = {
       #enable = true;
       #description = "Sweet Dreams";
@@ -133,11 +164,11 @@
     };
   };
 
-  # Custom shell
+  # crab cult
   environment.shells = with pkgs; [ nushell ];
 
 
-  # Allow unfree packages
+  # oss is cool, don't sue me
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
@@ -145,6 +176,8 @@
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
+  # or just use home manager
+    sddm-dukk-theme
   ];
 
 
@@ -155,6 +188,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.05"; # Did you read the comment?
+  system.stateVersion = "23.05"; # Did you read the comment? (no)
 
 }

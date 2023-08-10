@@ -236,17 +236,18 @@ local plugins =  {
     'alaviss/nim.nvim',
   },
   {
-    "lvimuser/lsp-inlayhints.nvim",
-    event = "LspAttach",
-    config = function(args)
-      require("lsp-inlayhints").setup()
-      if not (args.data and args.data.client_id) then
-        return
-      end
-      local bufnr = args.buf
-      local client = vim.lsp.get_client_by_id(args.data.client_id)
-      require("lsp-inlayhints").on_attach(client, bufnr)
-    end,
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+    },
   },
 }
 -- Install plugins

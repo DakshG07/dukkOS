@@ -548,8 +548,10 @@ source ~/.nix/apps/nushell/zoxide.nu
 alias shoot = with-env {TF_ALIAS: "fuck", PYTHONIOENCODING: "utf-8"} {
     thefuck (history | last 1 | get command.0)
 }
-alias ilike = git config --global --add safe.directory
+alias gitlikes = git config --global --add safe.directory
 alias gitsign = git config commit.gpgsign
 alias lg = lazygit
+alias getvolume = wpctl get-volume @DEFAULT_AUDIO_SINK@
+alias momhomemanageriscomplainingaboutgtkrcagain = rm -rf ~/.gtkrc-2.0
 let-env EDITOR = 'nvim'
 pfetch

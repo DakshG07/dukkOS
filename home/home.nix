@@ -8,6 +8,8 @@ let
     ../apps/nvim.nix
     ../apps/nushell.nix
     ../apps/helix.nix
+    ../apps/zellij.nix
+    ../apps/xmonad.nix
     hyprland.homeManagerModules.default
   ];
   new = newpkgs.legacyPackages.${system};
@@ -25,9 +27,7 @@ in
   # environment.
   home.packages = with pkgs; [
     # Tools
-    nodejs
     swww
-    zig
     libnotify
     polkit_gnome
     bluez
@@ -37,7 +37,17 @@ in
     xdg-desktop-portal-gtk
     brightnessctl
     unzip
-    ghc
+    xclip
+    feh
+    picom
+    # Langs
+    ghc            # Haskell
+    cargo
+    rustc
+    rust-analyzer  # Rust
+    nodejs         # Node
+    zig            # Zig
+    clang-tools    # C
     # CLIs
     gh
     git
@@ -52,6 +62,9 @@ in
     pfetch
     catppuccinifier.packages.${pkgs.system}.cli
     thefuck
+    zellij
+    hyperfine
+    htop
     # Editors
     helix
     # GUIs
@@ -73,6 +86,9 @@ in
     kdenlive
     vivaldi
     gparted
+    obs-studio
+    inkscape
+    rofi
     # Fonts
     recursive
   ];
@@ -84,6 +100,8 @@ in
     nvim.enable = true;
     nushell.enable = true;
     helix.enable = true;
+    zellij.enable = true;
+    xmonad.enable = true;
   };
 
   home.sessionVariables = {
