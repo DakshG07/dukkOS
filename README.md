@@ -19,5 +19,6 @@ To install, simply clone the flake, and run (from the flake directory):
 ```sh
 sudo nixos-rebuild switch --flake ".#nixos"
 ```
+~~You'll probably want to use your~~ `hardware-configuration.nix` ~~, but you can do that yourself.~~
 
 The old Windows config is available in the [`old-wsl`](https://github.com/DakshG07/nix-stuff/tree/old-wsl) branch, for those who suffer from seperation anxiety.
