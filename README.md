@@ -10,8 +10,9 @@ What's in the box:
 - ~~Hyprland~~ XMonad so you can show off to your friends.
 - KDE, for when you want to be productive.
 - Vivaldi *and* Firefox, in case you lack commitment.
-- Neovim, the real developer's text editor ™
-- A config that *could* be much cleaner but is intead stuck in a perpetual "good enough"
+- Neovim, the real developer's text editor ™.
+- A config that *could* be much cleaner but is instead stuck in a perpetual "good enough".
+- Stuff I no longer use and should uninstall, but won't because I'm too lazy.
 
 Need I say more?
 To install, simply clone the flake, and run (from the flake directory):
