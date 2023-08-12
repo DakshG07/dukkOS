@@ -12,13 +12,22 @@ import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 
-myModMask = mod4Mask
-myTerminal = "wezterm"
+myModMask    = mod4Mask
+myTerminal   = "wezterm"
 myWorkspaces = show <$> [1,2,3,4,5,6,7,8,9]
-myKeys = [ ("M-r", spawn "rofi -show drun")   -- Rofi
-         , ("M-<Return>", spawn myTerminal)   -- Open Terminal
+myScreenshot = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
+myVolumeUp   = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+myVolumeDown = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+myVolumeMute = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
+         , ("M-<Return>", spawn myTerminal)       -- Open Terminal
          , ("M-S-<Return>", windows W.swapMaster) -- Set to master
-         , ("M-w", kill)                      -- Close window
+         , ("M-w", kill)                          -- Close window
+         , ("M-S-s", myScreenshot)                -- Screenshot
+         , ("<XF86AudioRaiseVolume>", myVolumeUp)
+         , ("<XF86AudioLowerVolume>", myVolumeDown)
+         , ("<XF86AudioMute>", myVolumeMute)
+         -- TODO: brightness control
          ] ++
          [ (otherModMasks ++ "M-" ++ [key], action tag)
            | (tag, key)  <- zip myWorkspaces "123456789"
@@ -44,8 +53,7 @@ myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spac
 myStartup :: X ()
 myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
     [ "feh --bg-scale ~/.nix/wallpaper.png"
-    , "pkill gpg-agent"
-    , "gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
+    , "pkill gpg-agent && gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
     , "picom --config ~/.nix/apps/picom/picom.conf"
     , "polybar -q --reload main"
     , "polybar -q --reload monitor"

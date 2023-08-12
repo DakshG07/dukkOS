@@ -7,7 +7,7 @@ What you get:
 - Random bloat pre-installed that you may never use
 
 What's in the box:
-- ~~Hyprland~~ XMonad so you can show off to your friends.
+- XMonad so you can show off to your friends.
 - KDE, for when you want to be productive.
 - Vivaldi *and* Firefox, in case you lack commitment.
 - Neovim, the real developer's text editor ™.

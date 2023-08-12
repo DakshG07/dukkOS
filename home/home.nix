@@ -1,17 +1,15 @@
-{ config, pkgs, lib, hyprland, catppuccinifier, newpkgs, system, ... }:
+{ config, pkgs, lib, catppuccinifier, newpkgs, system, ... }:
 
 let
   # Custom configs
   imports = [
     ../apps/wezterm.nix
-    ../apps/hyprland.nix
     ../apps/nvim.nix
     ../apps/nushell.nix
     ../apps/helix.nix
     ../apps/zellij.nix
     ../apps/xmonad.nix
     ../apps/polybar.nix
-    hyprland.homeManagerModules.default
   ];
   new = newpkgs.legacyPackages.${system};
 in
@@ -33,7 +31,6 @@ in
     polkit_gnome
     bluez
     direnv
-    wl-clipboard
     ffmpeg
     xdg-desktop-portal-gtk
     brightnessctl
@@ -62,10 +59,10 @@ in
     pinentry-qt
     pfetch
     catppuccinifier.packages.${pkgs.system}.cli
-    thefuck
     zellij
     hyperfine
     htop
+    maim
     # Editors
     helix
     # GUIs
@@ -73,15 +70,10 @@ in
     wezterm
     new.thunderbird
     obsidian
-    wofi
-    wdisplays
-    eww-wayland
+    eww
     dunst
-    swaylock
     blueman
     gnome.nautilus
-    grim
-    slurp
     audacity
     vlc
     kdenlive
@@ -98,7 +90,6 @@ in
   # Custom configs
   dotfiles = {
     wezterm.enable = true;
-    hyprland.enable = true;
     nvim.enable = true;
     nushell.enable = true;
     helix.enable = true;
@@ -110,9 +101,6 @@ in
   home.sessionVariables = {
     EDITOR = "nvim";
   };
-
-  # Hyprland
-  wayland.windowManager.hyprland.enable = true;
 
   # Nushell
   programs.nushell.enable = true;

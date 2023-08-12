@@ -72,7 +72,8 @@ in
       General = { InputMethod = ""; };
     };
   };
-  # i prefer gnome but hyprland doesn't (screw xdg-portal-gnome)
+  # i preferred gnome but hyprland didn't (screw xdg-portal-gnome)
+  # of course, i don't use hyprland anymore, so...
   services.xserver.desktopManager.plasma5.enable = true;
   # trying something new
   services.xserver.windowManager.xmonad = {

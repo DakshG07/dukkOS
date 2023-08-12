@@ -8,10 +8,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hyprland = {
-      url = "github:hyprwm/Hyprland";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     catppuccinifier = {
       url = "github:DakshG07/catppuccinifier";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,7 +16,7 @@
 
   description = "A very basic flake";
 
-  outputs = { self, nixpkgs, newpkgs, home-manager, hyprland, catppuccinifier, ... }@attrs:
+  outputs = { self, nixpkgs, newpkgs, home-manager, catppuccinifier, ... }@attrs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -35,18 +31,13 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
-              inherit (attrs) nixpkgs hyprland catppuccinifier newpkgs;
+              inherit (attrs) nixpkgs catppuccinifier newpkgs;
               inherit system;
               flakePath = "/home/dukk/.nix";
             };
             home-manager.users.dukk = import ./home/home.nix;
             nixpkgs.config.allowUnfree = true;
           })
-          hyprland.nixosModules.default
-          {
-            programs.hyprland.enable = true;
-            programs.hyprland.nvidiaPatches = true;
-          }
         ];
       };
     };
