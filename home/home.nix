@@ -10,6 +10,7 @@ let
     ../apps/helix.nix
     ../apps/zellij.nix
     ../apps/xmonad.nix
+    ../apps/polybar.nix
     hyprland.homeManagerModules.default
   ];
   new = newpkgs.legacyPackages.${system};
@@ -89,6 +90,7 @@ in
     obs-studio
     inkscape
     rofi
+    polybar
     # Fonts
     recursive
   ];
@@ -102,6 +104,7 @@ in
     helix.enable = true;
     zellij.enable = true;
     xmonad.enable = true;
+    polybar.enable = true;
   };
 
   home.sessionVariables = {

@@ -4,6 +4,7 @@
 
 let 
   sddm-dukk-theme = pkgs.callPackage ../apps/sddm.nix {};
+  dukk-picom = pkgs.callPackage ../apps/picom.nix {};
 in
 {
   imports =
@@ -170,6 +171,11 @@ in
 
   # oss is cool, don't sue me
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    (final: prev: {
+      picom = dukk-picom;
+    })
+  ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

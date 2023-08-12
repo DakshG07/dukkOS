@@ -1,15 +1,20 @@
 import XMonad
 
 import XMonad.Util.EZConfig
+import XMonad.Util.Types
 import XMonad.Layout.Spacing
+import XMonad.Layout.Gaps
+import XMonad.Layout.NoBorders
 import XMonad.StackSet as W
 import XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Actions.CycleWS
-import XMonad.Util.Types
+import XMonad.Actions.UpdatePointer
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.ManageDocks
 
 myModMask = mod4Mask
 myTerminal = "wezterm"
-myWorkspaces = ["1","2","3","4","5","6","7","8","9"]
+myWorkspaces = show <$> [1,2,3,4,5,6,7,8,9]
 myKeys = [ ("M-r", spawn "rofi -show drun")   -- Rofi
          , ("M-<Return>", spawn myTerminal)   -- Open Terminal
          , ("M-S-<Return>", windows W.swapMaster) -- Set to master
@@ -20,7 +25,9 @@ myKeys = [ ("M-r", spawn "rofi -show drun")   -- Rofi
            , (otherModMasks, action) <- [ ("", windows . W.view) -- was W.greedyView
                                            , ("S-", windows . W.shift)]
          ]
-myLayout = smartSpacing 10 $ tiled ||| Mirror tiled ||| Full
+-- whilst it's suggested to use avoidStruts AFTER applying any screen gaps,
+-- we disregard this since we intend for there to be an extra gap at the top (between the bar)
+myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spacingRaw True (Border 0 0 0 0) False (Border 10 10 10 10) True $ tiled ||| Mirror tiled ||| Full
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled   = Tall nmaster delta ratio
@@ -35,17 +42,27 @@ myLayout = smartSpacing 10 $ tiled ||| Mirror tiled ||| Full
     delta   = 3/100
 
 myStartup :: X ()
-myStartup = spawn $ foldr1 (\a b -> a ++ " ; " ++ b) -- startup tasks
-    [ "feh --bg-scale ~/.nix/car.jpg"
+myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
+    [ "feh --bg-scale ~/.nix/wallpaper.png"
     , "pkill gpg-agent"
     , "gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
     , "picom --config ~/.nix/apps/picom/picom.conf"
+    , "polybar -q --reload main"
+    , "polybar -q --reload monitor"
     ]
 
+myLogHook = updatePointer (0.5, 0.5) (0, 0) -- bring my cursor with me!
+
 main :: IO ()
-main = xmonad $ def
-    { modMask    = myModMask
-    , terminal   = myTerminal
-    , layoutHook = myLayout
-    }
-    `additionalKeysP` myKeys
+main = do
+         xmonad $ docks . ewmhFullscreen . ewmh $ def
+           { modMask     = myModMask
+           , terminal    = myTerminal
+           , layoutHook  = myLayout
+           , startupHook = myStartup
+           , logHook     = myLogHook
+           , normalBorderColor = "#1e1e2e"
+           , focusedBorderColor = "#f5c2e7"
+           , borderWidth = 5
+           }
+           `additionalKeysP` myKeys
