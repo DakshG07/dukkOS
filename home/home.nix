@@ -38,8 +38,10 @@ in
     xclip
     feh
     picom
+    dconf
     # Langs
     ghc            # Haskell
+    stack
     cargo
     rustc
     rust-analyzer  # Rust
