@@ -48,6 +48,9 @@ in
     nodejs         # Node
     zig            # Zig
     clang-tools    # C
+    gcc
+    jdk8           # Java
+    jre8
     # CLIs
     gh
     git
@@ -65,6 +68,7 @@ in
     hyperfine
     htop
     maim
+    gpg-tui
     # Editors
     helix
     # GUIs
