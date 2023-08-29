@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     xdg.configFile."helix" = {
       recursive = true;
-      source = link "${flakePath}/apps/helix";
+      source = link "${flakePath}/dotfiles/helix";
     };
   };
 }

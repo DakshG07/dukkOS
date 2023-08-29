@@ -3,8 +3,8 @@
 { config, pkgs, ... }:
 
 let 
-  sddm-dukk-theme = pkgs.callPackage ../apps/sddm.nix {};
-  dukk-picom = pkgs.callPackage ../apps/picom.nix {};
+  sddm-dukk-theme = pkgs.callPackage ../dotfiles/sddm.nix {};
+  dukk-picom = pkgs.callPackage ../dotfiles/picom.nix {};
 in
 {
   imports =

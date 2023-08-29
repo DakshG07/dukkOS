@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     xdg.configFile."zellij" = {
       recursive = true;
-      source = link "${flakePath}/apps/zellij";
+      source = link "${flakePath}/dotfiles/zellij";
     };
   };
 }

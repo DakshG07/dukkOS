@@ -12,7 +12,7 @@ in {
     xdg.configFile."hypr/hyprland.conf".enable = false;
     # Load in our config
     xdg.configFile."hypr" = {
-      source = link "${flakePath}/apps/hyprland";
+      source = link "${flakePath}/dotfiles/hyprland";
       recursive = true;
     };
   };

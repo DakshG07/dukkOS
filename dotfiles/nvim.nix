@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     # Load in config
     xdg.configFile."nvim" = {
-      source = link "${flakePath}/apps/nvim";
+      source = link "${flakePath}/dotfiles/nvim";
       recursive = true;
     };
   };

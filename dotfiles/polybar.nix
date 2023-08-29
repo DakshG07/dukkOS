@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     xdg.configFile."polybar" = {
       recursive = true;
-      source = link "${flakePath}/apps/polybar";
+      source = link "${flakePath}/dotfiles/polybar";
     };
   };
 }

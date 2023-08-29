@@ -13,7 +13,7 @@ in {
     xdg.configFile."nushell/env.nu".enable = false;
     # Load in our config
     xdg.configFile."nushell" = {
-      source = link "${flakePath}/apps/nushell";
+      source = link "${flakePath}/dotfiles/nushell";
       recursive = true;
     };
   };

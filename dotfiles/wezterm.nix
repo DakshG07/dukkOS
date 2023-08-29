@@ -10,7 +10,7 @@ in {
   config = mkIf cfg.enable {
     xdg.configFile."wezterm" = {
       recursive = true;
-      source = link "${flakePath}/apps/wezterm";
+      source = link "${flakePath}/dotfiles/wezterm";
     };
   };
 }

@@ -3,13 +3,13 @@
 let
   # Custom configs
   imports = [
-    ../apps/wezterm.nix
-    ../apps/nvim.nix
-    ../apps/nushell.nix
-    ../apps/helix.nix
-    ../apps/zellij.nix
-    ../apps/xmonad.nix
-    ../apps/polybar.nix
+    ../dotfiles/wezterm.nix
+    ../dotfiles/nvim.nix
+    ../dotfiles/nushell.nix
+    ../dotfiles/helix.nix
+    ../dotfiles/zellij.nix
+    ../dotfiles/xmonad.nix
+    ../dotfiles/polybar.nix
   ];
   new = newpkgs.legacyPackages.${system};
 in

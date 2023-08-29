@@ -9,7 +9,7 @@ in {
 
   config = mkIf cfg.enable {
     home.file.".xmonad" = {
-      source = link "${flakePath}/apps/xmonad";
+      source = link "${flakePath}/dotfiles/xmonad";
       recursive = true;
     };
   };
