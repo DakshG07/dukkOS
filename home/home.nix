@@ -1,8 +1,8 @@
 { config, pkgs, lib, catppuccinifier, newpkgs, system, ... }:
 
 let
-  # Custom configs
   imports = [
+    # Custom dotfiles
     ../dotfiles/wezterm.nix
     ../dotfiles/nvim.nix
     ../dotfiles/nushell.nix
@@ -10,6 +10,8 @@ let
     ../dotfiles/zellij.nix
     ../dotfiles/xmonad.nix
     ../dotfiles/polybar.nix
+    # Packages
+    ../packages/langs.nix
   ];
   new = newpkgs.legacyPackages.${system};
 in
@@ -39,18 +41,6 @@ in
     feh
     picom
     dconf
-    # Langs
-    ghc            # Haskell
-    stack
-    cargo
-    rustc
-    rust-analyzer  # Rust
-    nodejs         # Node
-    zig            # Zig
-    clang-tools    # C
-    gcc
-    jdk8           # Java
-    jre8
     # CLIs
     gh
     git
@@ -102,6 +92,17 @@ in
     zellij.enable = true;
     xmonad.enable = true;
     polybar.enable = true;
+  };
+
+  # Packages
+  packages = {
+    langs = {
+      haskell.enable = true;
+      rust.enable = true;
+      node.enable = true;
+      zig.enable = true;
+      c.enable = true;
+    };
   };
 
   home.sessionVariables = {
