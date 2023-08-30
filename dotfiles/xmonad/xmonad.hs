@@ -54,7 +54,7 @@ myStartup :: X ()
 myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
     [ "feh --bg-scale ~/.nix/wallpaper.png"
     , "pkill gpg-agent && gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
-    , "picom --config ~/.nix/apps/picom/picom.conf"
+    , "picom --config ~/.nix/dotfiles/picom/picom.conf"
     , "polybar -q --reload main"
     , "polybar -q --reload monitor"
     ]
