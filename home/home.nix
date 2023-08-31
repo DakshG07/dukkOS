@@ -11,7 +11,11 @@ let
     ../dotfiles/xmonad.nix
     ../dotfiles/polybar.nix
     # Packages
+    ../packages/core.nix
+    ../packages/tools.nix
+    ../packages/utils.nix
     ../packages/langs.nix
+    ../packages/bloat.nix
   ];
   new = newpkgs.legacyPackages.${system};
 in
@@ -24,65 +28,6 @@ in
 
   home.stateVersion = "23.05";
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  home.packages = with pkgs; [
-    # Tools
-    swww
-    libnotify
-    polkit_gnome
-    bluez
-    direnv
-    ffmpeg
-    xdg-desktop-portal-gtk
-    brightnessctl
-    unzip
-    xclip
-    feh
-    picom
-    dconf
-    # CLIs
-    gh
-    git
-    neofetch
-    lazygit
-    just
-    nushell
-    zoxide
-    fzf
-    gnupg
-    pinentry-qt
-    pfetch
-    catppuccinifier.packages.${pkgs.system}.cli
-    zellij
-    hyperfine
-    htop
-    maim
-    gpg-tui
-    # Editors
-    helix
-    # GUIs
-    firefox
-    wezterm
-    new.thunderbird
-    obsidian
-    eww
-    dunst
-    blueman
-    gnome.nautilus
-    audacity
-    vlc
-    kdenlive
-    vivaldi
-    gparted
-    obs-studio
-    inkscape
-    rofi
-    polybar
-    # Fonts
-    recursive
-  ];
-
   # Custom configs
   dotfiles = {
     wezterm.enable = true;
@@ -94,8 +39,17 @@ in
     polybar.enable = true;
   };
 
+  # Not gonna make an option for this so I'll just put it here
+  home.packages = [
+    catppuccinifier.packages.${pkgs.system}.cli
+  ];
+
   # Packages
   packages = {
+    core.enable = true;
+    tools.enable = true;
+    utils.enable = true;
+    bloat.enable = true;
     langs = {
       haskell.enable = true;
       rust.enable = true;

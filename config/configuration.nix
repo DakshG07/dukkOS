@@ -1,6 +1,6 @@
 # dukk.nix v7
 
-{ config, pkgs, ... }:
+{ config, pkgs, newpkgs, ... }:
 
 let 
   sddm-dukk-theme = pkgs.callPackage ../dotfiles/sddm.nix {};
@@ -175,6 +175,10 @@ in
   nixpkgs.overlays = [
     (final: prev: {
       picom = dukk-picom;
+      new = import newpkgs {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
     })
   ];
 
