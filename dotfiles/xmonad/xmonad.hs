@@ -53,7 +53,7 @@ myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spac
 myStartup :: X ()
 myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
     [ "feh --bg-scale ~/.nix/wallpaper.png"
-    , "pkill gpg-agent && gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
+    , "pkill gpg-agent;gpg-agent --pinentry-program=/etc/profiles/per-user/dukk/bin/pinentry-qt --daemon"
     , "picom --config ~/.nix/dotfiles/picom/picom.conf"
     , "polybar -q --reload main"
     , "polybar -q --reload monitor"
