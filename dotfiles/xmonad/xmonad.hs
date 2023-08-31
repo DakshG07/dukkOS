@@ -11,6 +11,7 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.UpdatePointer
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Operations hiding (float)
 
 myModMask    = mod4Mask
 myTerminal   = "wezterm"
@@ -28,11 +29,13 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("<XF86AudioLowerVolume>", myVolumeDown)
          , ("<XF86AudioMute>", myVolumeMute)
          -- TODO: brightness control
+         , ("M-v", withFocused (\w -> windows (W.float w (RationalRect (1/4) (1/4) (1/2) (1/2)))))
          ] ++
          [ (otherModMasks ++ "M-" ++ [key], action tag)
            | (tag, key)  <- zip myWorkspaces "123456789"
            , (otherModMasks, action) <- [ ("", windows . W.view) -- was W.greedyView
-                                           , ("S-", windows . W.shift)]
+                                           , ("S-", windows . W.shift)
+                                           , ("C-", windows . W.greedyView)]
          ]
 -- whilst it's suggested to use avoidStruts AFTER applying any screen gaps,
 -- we disregard this since we intend for there to be an extra gap at the top (between the bar)
