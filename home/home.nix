@@ -44,6 +44,12 @@ in
     catppuccinifier.packages.${pkgs.system}.cli
   ];
 
+  # Maybe now gpg-agent will work
+  services.gpg-agent = {
+    enable = true;
+    pinentryFlavor = "qt";
+  };
+
   # Packages
   packages = {
     core.enable = true;
