@@ -114,7 +114,7 @@ in
   users.users.dukk = {
     isNormalUser = true;
     description = "Daksh Gupta";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
     packages = with pkgs; [];
     shell = pkgs.nushell;
   };

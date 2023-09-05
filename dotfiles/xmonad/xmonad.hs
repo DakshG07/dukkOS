@@ -21,6 +21,8 @@ myScreenshot  = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
 myVolumeUp    = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
 myVolumeDown  = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
 myVolumeMute  = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+myBrightUp    = spawn "brightnessctl -d intel_backlight set +10%"
+myBrightDown  = spawn "brightnessctl -d intel_backlight set 10%-"
 myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("M-<Return>", spawn myTerminal)       -- Open Terminal
          , ("M-e", spawn myFileManager)
@@ -30,7 +32,8 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("<XF86AudioRaiseVolume>", myVolumeUp)
          , ("<XF86AudioLowerVolume>", myVolumeDown)
          , ("<XF86AudioMute>", myVolumeMute)
-         -- TODO: brightness control
+         , ("<XF86MonBrightnessUp>", myBrightUp)
+         , ("<XF86MonBrightnessDown>", myBrightDown)
          , ("M-v", withFocused (\w -> windows (W.float w (RationalRect (1/4) (1/4) (1/2) (1/2)))))
          ] ++
          [ (otherModMasks ++ "M-" ++ [key], action tag)
