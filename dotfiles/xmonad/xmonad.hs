@@ -13,15 +13,17 @@ import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Operations hiding (float)
 
-myModMask    = mod4Mask
-myTerminal   = "wezterm"
-myWorkspaces = show <$> [1,2,3,4,5,6,7,8,9]
-myScreenshot = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
-myVolumeUp   = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
-myVolumeDown = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
-myVolumeMute = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+myModMask     = mod4Mask
+myTerminal    = "wezterm"
+myFileManager = "nautilus"
+myWorkspaces  = show <$> [1,2,3,4,5,6,7,8,9]
+myScreenshot  = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
+myVolumeUp    = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
+myVolumeDown  = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+myVolumeMute  = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
 myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("M-<Return>", spawn myTerminal)       -- Open Terminal
+         , ("M-e", spawn myFileManager)
          , ("M-S-<Return>", windows W.swapMaster) -- Set to master
          , ("M-w", kill)                          -- Close window
          , ("M-S-s", myScreenshot)                -- Screenshot
@@ -61,7 +63,7 @@ myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
     , "polybar -q --reload monitor"
     ]
 
-myLogHook = updatePointer (0.5, 0.5) (0, 0) -- bring my cursor with me!
+myLogHook = updatePointer (0.5, 0.5) (0, 0) -- when i change windows, bring my cursor with me!
 
 main :: IO ()
 main = do

@@ -1,4 +1,4 @@
-// General development
+// EGUI development
 layout {
     default_tab_template {
       children
@@ -6,18 +6,17 @@ layout {
           plugin location="zellij:compact-bar"
       }
     }
-    tab name="Neovim" {
+    tab focus=true name="Neovim" {
       pane {
+        name "The One True Text Editor"
         command "nvim"
         focus true
       }
     }
     tab name="Terminal" split_direction="vertical" {
-      pane command="npm" {
-        args "run" "dev"
-      }
-      pane command="ssh" start_suspended=true {
-        args "-R" "80:localhost:3000" "nokey@localhost.run"
+      pane name="Cargo"
+      pane name="Trunk" focus=true command="trunk" {
+        args "serve"
       }
     }
 }

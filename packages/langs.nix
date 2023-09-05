@@ -19,7 +19,7 @@ in
   # lines 21-26 give me lisp vibes
   config.home = with pkgs; mkMerge [
     (makelang "haskell" [ghc stack])
-    (makelang "rust" [cargo rustc rust-analyzer])
+    (makelang "rust" [rustup])
     (makelang "node" [nodejs])
     (makelang "zig" [zig])
     (makelang "c" [clang-tools gcc])
