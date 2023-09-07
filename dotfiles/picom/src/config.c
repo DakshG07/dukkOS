@@ -3,20 +3,12 @@
 // Copyright (c) 2013 Richard Grenville <pyxlcy@gmail.com>
 
 #include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <math.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <xcb/render.h>        // for xcb_render_fixed_t, XXX
-
-#include <test.h>
 
 #include "c2.h"
 #include "common.h"
@@ -30,98 +22,6 @@
 #include "win.h"
 
 #include "config.h"
-
-const char *xdg_config_home(void) {
-	char *xdgh = getenv("XDG_CONFIG_HOME");
-	char *home = getenv("HOME");
-	const char *default_dir = "/.config";
-
-	if (!xdgh) {
-		if (!home) {
-			return NULL;
-		}
-
-		xdgh = cvalloc(strlen(home) + strlen(default_dir) + 1);
-
-		strcpy(xdgh, home);
-		strcat(xdgh, default_dir);
-	} else {
-		xdgh = strdup(xdgh);
-	}
-
-	return xdgh;
-}
-
-char **xdg_config_dirs(void) {
-	char *xdgd = getenv("XDG_CONFIG_DIRS");
-	size_t count = 0;
-
-	if (!xdgd) {
-		xdgd = "/etc/xdg";
-	}
-
-	for (int i = 0; xdgd[i]; i++) {
-		if (xdgd[i] == ':') {
-			count++;
-		}
-	}
-
-	// Store the string and the result pointers together so they can be
-	// freed together
-	char **dir_list = cvalloc(sizeof(char *) * (count + 2) + strlen(xdgd) + 1);
-	auto dirs = strcpy((char *)dir_list + sizeof(char *) * (count + 2), xdgd);
-	auto path = dirs;
-
-	for (size_t i = 0; i < count; i++) {
-		dir_list[i] = path;
-		path = strchr(path, ':');
-		*path = '\0';
-		path++;
-	}
-	dir_list[count] = path;
-
-	size_t fill = 0;
-	for (size_t i = 0; i <= count; i++) {
-		if (dir_list[i][0] == '/') {
-			dir_list[fill] = dir_list[i];
-			fill++;
-		}
-	}
-
-	dir_list[fill] = NULL;
-
-	return dir_list;
-}
-
-TEST_CASE(xdg_config_dirs) {
-	auto old_var = getenv("XDG_CONFIG_DIRS");
-	if (old_var) {
-		old_var = strdup(old_var);
-	}
-	unsetenv("XDG_CONFIG_DIRS");
-
-	auto result = xdg_config_dirs();
-	TEST_STREQUAL(result[0], "/etc/xdg");
-	TEST_EQUAL(result[1], NULL);
-	free(result);
-
-	setenv("XDG_CONFIG_DIRS", ".:.:/etc/xdg:.:/:", 1);
-	result = xdg_config_dirs();
-	TEST_STREQUAL(result[0], "/etc/xdg");
-	TEST_STREQUAL(result[1], "/");
-	TEST_EQUAL(result[2], NULL);
-	free(result);
-
-	setenv("XDG_CONFIG_DIRS", ":", 1);
-	result = xdg_config_dirs();
-	TEST_EQUAL(result[0], NULL);
-	free(result);
-
-	if (old_var) {
-		setenv("XDG_CONFIG_DIRS", old_var, 1);
-		free(old_var);
-	}
-}
 
 /**
  * Parse a long number.
@@ -509,146 +409,33 @@ parse_geometry_end:
 }
 
 /**
- * Parse a list of window rules, prefixed with a number, separated by a ':'
+ * Parse a list of opacity rules.
  */
-bool parse_numeric_window_rule(c2_lptr_t **res, const char *src, long min, long max) {
-	if (!src) {
-		return false;
-	}
-
-	// Find numeric value
+bool parse_rule_opacity(c2_lptr_t **res, const char *src) {
+	// Find opacity value
 	char *endptr = NULL;
 	long val = strtol(src, &endptr, 0);
 	if (!endptr || endptr == src) {
-		log_error("No number specified: %s", src);
+		log_error("No opacity specified: %s", src);
 		return false;
 	}
-
-	if (val < min || val > max) {
-		log_error("Number not in range (%ld <= n <= %ld): %s", min, max, src);
+	if (val > 100 || val < 0) {
+		log_error("Opacity %ld invalid: %s", val, src);
 		return false;
 	}
 
 	// Skip over spaces
-	while (*endptr && isspace((unsigned char)*endptr)) {
+	while (*endptr && isspace((unsigned char)*endptr))
 		++endptr;
-	}
 	if (':' != *endptr) {
-		log_error("Number separator (':') not found: %s", src);
+		log_error("Opacity terminator not found: %s", src);
 		return false;
 	}
 	++endptr;
 
 	// Parse pattern
+	// I hope 1-100 is acceptable for (void *)
 	return c2_parse(res, endptr, (void *)val);
-}
-
-/// Search for auxiliary file under a base directory
-static char *locate_auxiliary_file_at(const char *base, const char *scope, const char *file) {
-	scoped_charp path = mstrjoin(base, scope);
-	mstrextend(&path, "/");
-	mstrextend(&path, file);
-	if (access(path, O_RDONLY) == 0) {
-		// Canonicalize path to avoid duplicates
-		char *abspath = realpath(path, NULL);
-		return abspath;
-	}
-	return NULL;
-}
-
-/**
- * Get a path of an auxiliary file to read, could be a shader file, or any supplimenrary
- * file.
- *
- * Follows the XDG specification to search for the shader file in configuration locations.
- *
- * The search order is:
- *   1) If an absolute path is given, use it directly.
- *   2) Search for the file directly under `include_dir`.
- *   3) Search for the file in the XDG configuration directories, under path
- *      /picom/<scope>/
- */
-char *locate_auxiliary_file(const char *scope, const char *path, const char *include_dir) {
-	if (!path || strlen(path) == 0) {
-		return NULL;
-	}
-
-	// Filename is absolute path, so try to load from there
-	if (path[0] == '/') {
-		if (access(path, O_RDONLY) == 0) {
-			return realpath(path, NULL);
-		}
-	}
-
-	// First try to load file from the include directory (i.e. relative to the
-	// config file)
-	if (include_dir && strlen(include_dir)) {
-		char *ret = locate_auxiliary_file_at(include_dir, "", path);
-		if (ret) {
-			return ret;
-		}
-	}
-
-	// Fall back to searching in user config directory
-	scoped_charp picom_scope = mstrjoin("/picom/", scope);
-	scoped_charp config_home = (char *)xdg_config_home();
-	char *ret = locate_auxiliary_file_at(config_home, picom_scope, path);
-	if (ret) {
-		return ret;
-	}
-
-	// Fall back to searching in system config directory
-	auto config_dirs = xdg_config_dirs();
-	for (int i = 0; config_dirs[i]; i++) {
-		ret = locate_auxiliary_file_at(config_dirs[i], picom_scope, path);
-		if (ret) {
-			free(config_dirs);
-			return ret;
-		}
-	}
-	free(config_dirs);
-
-	return ret;
-}
-
-/**
- * Parse a list of window shader rules.
- */
-bool parse_rule_window_shader(c2_lptr_t **res, const char *src, const char *include_dir) {
-	if (!src) {
-		return false;
-	}
-
-	// Find custom shader terminator
-	const char *endptr = strchr(src, ':');
-	if (!endptr) {
-		log_error("Custom shader terminator not found: %s", src);
-		return false;
-	}
-
-	// Parse and create custom shader
-	scoped_charp untrimed_shader_source = strdup(src);
-	if (!untrimed_shader_source) {
-		return false;
-	}
-	auto source_end = strchr(untrimed_shader_source, ':');
-	*source_end = '\0';
-
-	size_t length;
-	char *tmp = (char *)trim_both(untrimed_shader_source, &length);
-	tmp[length] = '\0';
-	char *shader_source = NULL;
-
-	if (strcasecmp(tmp, "default") != 0) {
-		shader_source = locate_auxiliary_file("shaders", tmp, include_dir);
-		if (!shader_source) {
-			log_error("Custom shader file \"%s\" not found for rule: %s", tmp, src);
-			free(shader_source);
-			return false;
-		}
-	}
-
-	return c2_parse(res, ++endptr, (void *)shader_source);
 }
 
 /**
@@ -717,6 +504,18 @@ void set_default_winopts(options_t *opt, win_option_mask_t *mask, bool shadow_en
 			mask[i].animation = OPEN_WINDOW_ANIMATION_INVALID;
 			opt->wintype_option[i].animation = OPEN_WINDOW_ANIMATION_INVALID;
 		}
+		if (!mask[i].animation_unmap) {
+			mask[i].animation_unmap = OPEN_WINDOW_ANIMATION_INVALID;
+			opt->wintype_option[i].animation_unmap = OPEN_WINDOW_ANIMATION_INVALID;
+		}
+		if (!mask[i].animation_workspace_in) {
+			mask[i].animation_workspace_in = OPEN_WINDOW_ANIMATION_INVALID;
+			opt->wintype_option[i].animation_workspace_in = OPEN_WINDOW_ANIMATION_INVALID;
+		}
+		if (!mask[i].animation_workspace_out) {
+			mask[i].animation_workspace_out = OPEN_WINDOW_ANIMATION_INVALID;
+			opt->wintype_option[i].animation_workspace_out = OPEN_WINDOW_ANIMATION_INVALID;
+		}
 		if (!mask[i].clip_shadow_above) {
 			mask[i].clip_shadow_above = true;
 			opt->wintype_option[i].clip_shadow_above = false;
@@ -727,6 +526,8 @@ void set_default_winopts(options_t *opt, win_option_mask_t *mask, bool shadow_en
 enum open_window_animation parse_open_window_animation(const char *src) {
 	if (strcmp(src, "none") == 0) {
 		return OPEN_WINDOW_ANIMATION_NONE;
+	}else if (strcmp(src, "auto") == 0) {
+		return OPEN_WINDOW_ANIMATION_AUTO;
 	} else if (strcmp(src, "fly-in") == 0) {
 		return OPEN_WINDOW_ANIMATION_FLYIN;
 	} else if (strcmp(src, "zoom") == 0) {
@@ -739,22 +540,7 @@ enum open_window_animation parse_open_window_animation(const char *src) {
 		return OPEN_WINDOW_ANIMATION_SLIDE_LEFT;
 	} else if (strcmp(src, "slide-right") == 0) {
 		return OPEN_WINDOW_ANIMATION_SLIDE_RIGHT;
-	} else if (strcmp(src, "slide-out") == 0) {
-        return OPEN_WINDOW_ANIMATION_SLIDE_OUT;
-        } else if (strcmp(src, "slide-in") == 0) {
-        return OPEN_WINDOW_ANIMATION_SLIDE_IN;
-        } else if (strcmp(src, "slide-out-center") == 0) {
-            return OPEN_WINDOW_ANIMATION_SLIDE_OUT_CENTER;
-        } else if (strcmp(src, "slide-in-center") == 0) {
-            return OPEN_WINDOW_ANIMATION_SLIDE_IN_CENTER;
-        } else if (strcmp(src, "minimize") == 0 || strcmp(src, "maximize") == 0) {
-            return OPEN_WINDOW_ANIMATION_MINIMIZE;
-        } else if (strcmp(src, "squeeze") == 0) {
-            return OPEN_WINDOW_ANIMATION_SQUEEZE;
-        } else if (strcmp(src, "squeeze-bottom") == 0) {
-            return OPEN_WINDOW_ANIMATION_SQUEEZE_BOTTOM;
-        }
-
+	}
 	return OPEN_WINDOW_ANIMATION_INVALID;
 }
 
@@ -763,7 +549,6 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 	// clang-format off
 	*opt = (struct options){
 	    .backend = BKEND_XRENDER,
-	    .legacy_backends = false,
 	    .glx_no_stencil = false,
 	    .mark_wmwin_focused = false,
 	    .mark_ovredir_focused = false,
@@ -779,8 +564,9 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 	    .benchmark_wid = XCB_NONE,
 	    .logpath = NULL,
 
+	    .refresh_rate = 0,
+	    .sw_opti = false,
 	    .use_damage = true,
-	    .no_frame_pacing = false,
 
 	    .shadow_red = 0.0,
 	    .shadow_green = 0.0,
@@ -791,7 +577,7 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 	    .shadow_opacity = .75,
 	    .shadow_blacklist = NULL,
 	    .shadow_ignore_shaped = false,
-	    .crop_shadow_to_monitor = false,
+	    .xinerama_shadow_crop = false,
 	    .shadow_clip_list = NULL,
 
 	    .corner_radius = 0,
@@ -806,13 +592,14 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 	    .animations = false,
 	    .animation_for_open_window = OPEN_WINDOW_ANIMATION_NONE,
 	    .animation_for_transient_window = OPEN_WINDOW_ANIMATION_NONE,
-        .animation_for_unmap_window = OPEN_WINDOW_ANIMATION_NONE,
-        .animation_for_next_tag = OPEN_WINDOW_ANIMATION_NONE,
-        .animation_for_prev_tag = OPEN_WINDOW_ANIMATION_NONE,
+	    .animation_for_unmap_window = OPEN_WINDOW_ANIMATION_AUTO,
+	    .animation_for_workspace_switch_in = OPEN_WINDOW_ANIMATION_AUTO,
+	    .animation_for_workspace_switch_out = OPEN_WINDOW_ANIMATION_AUTO,
 	    .animation_stiffness = 200.0,
-	    .animation_stiffness_tag_change = 200.0,
 	    .animation_window_mass = 1.0,
 	    .animation_dampening = 25,
+	    .animation_delta = 10,
+	    .animation_force_steps = false,
 	    .animation_clamping = true,
 
 	    .inactive_opacity = 1.0,
@@ -830,8 +617,6 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 	    .blur_background_blacklist = NULL,
 	    .blur_kerns = NULL,
 	    .blur_kernel_count = 0,
-	    .window_shader_fg = NULL,
-	    .window_shader_fg_rules = NULL,
 	    .inactive_dim = 0.0,
 	    .inactive_dim_fixed = false,
 	    .invert_color_list = NULL,
@@ -846,8 +631,7 @@ char *parse_config(options_t *opt, const char *config_file, bool *shadow_enable,
 
 	    .track_leader = false,
 
-	    .rounded_corners_blacklist = NULL,
-	    .animation_blacklist = NULL
+	    .rounded_corners_blacklist = NULL
 	};
 	// clang-format on
 

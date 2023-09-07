@@ -37,22 +37,20 @@ struct backend_image {
 	double opacity;
 	double dim;
 	double max_brightness;
-	double corner_radius;
 	// Effective size of the image
 	int ewidth, eheight;
 	bool color_inverted;
-	int border_width;
 };
 
-bool build_shadow(struct x_connection *, double opacity, int width, int height,
-                  const conv *kernel, xcb_render_picture_t shadow_pixel,
+bool build_shadow(xcb_connection_t *, xcb_drawable_t, double opacity, int width,
+                  int height, const conv *kernel, xcb_render_picture_t shadow_pixel,
                   xcb_pixmap_t *pixmap, xcb_render_picture_t *pict);
 
-xcb_render_picture_t
-solid_picture(struct x_connection *, bool argb, double a, double r, double g, double b);
+xcb_render_picture_t solid_picture(xcb_connection_t *, xcb_drawable_t, bool argb,
+                                   double a, double r, double g, double b);
 
-xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opacity,
-                         int width, int height);
+xcb_image_t *
+make_shadow(xcb_connection_t *c, const conv *kernel, double opacity, int width, int height);
 
 /// The default implementation of `is_win_transparent`, it simply looks at win::mode. So
 /// this is not suitable for backends that alter the content of windows
@@ -62,18 +60,9 @@ bool default_is_win_transparent(void *, win *, void *);
 /// caveat as `default_is_win_transparent` applies.
 bool default_is_frame_transparent(void *, win *, void *);
 
-void *default_backend_render_shadow(backend_t *backend_data, int width, int height,
-                                    struct backend_shadow_context *sctx, struct color color);
-
-/// Implement `render_shadow` with `shadow_from_mask`.
 void *
-backend_render_shadow_from_mask(backend_t *backend_data, int width, int height,
-                                struct backend_shadow_context *sctx, struct color color);
-struct backend_shadow_context *
-default_create_shadow_context(backend_t *backend_data, double radius);
-
-void default_destroy_shadow_context(backend_t *backend_data,
-                                    struct backend_shadow_context *sctx);
+default_backend_render_shadow(backend_t *backend_data, int width, int height,
+                              const conv *kernel, double r, double g, double b, double a);
 
 void init_backend_base(struct backend_base *base, session_t *ps);
 
@@ -81,6 +70,8 @@ struct conv **generate_blur_kernel(enum blur_method method, void *args, int *ker
 struct dual_kawase_params *generate_dual_kawase_params(void *args);
 
 void *default_clone_image(backend_t *base, const void *image_data, const region_t *reg);
+void *default_resize_image(backend_t *base, const void *image_data, uint16_t desired_width,
+			   uint16_t desired_height, const region_t *reg);
 bool default_is_image_transparent(backend_t *base attr_unused, void *image_data);
 bool default_set_image_property(backend_t *base attr_unused, enum image_properties op,
                                 void *image_data, void *arg);

@@ -62,6 +62,7 @@ in
       node.enable = true;
       zig.enable = true;
       c.enable = true;
+      python.enable = true;
     };
   };
 

@@ -15,8 +15,6 @@
 #include <xcb/xcb.h>
 #include <xcb/xfixes.h>
 
-#include "uthash_extra.h"
-
 #ifdef CONFIG_LIBCONFIG
 #include <libconfig.h>
 #endif
@@ -36,25 +34,20 @@ enum backend {
 	BKEND_GLX,
 	BKEND_XR_GLX_HYBRID,
 	BKEND_DUMMY,
-	BKEND_EGL,
 	NUM_BKEND,
 };
 
 enum open_window_animation {
 	OPEN_WINDOW_ANIMATION_NONE = 0,
+	OPEN_WINDOW_ANIMATION_AUTO,
 	OPEN_WINDOW_ANIMATION_FLYIN,
+	OPEN_WINDOW_ANIMATION_ZOOM,
 	OPEN_WINDOW_ANIMATION_SLIDE_UP,
 	OPEN_WINDOW_ANIMATION_SLIDE_DOWN,
 	OPEN_WINDOW_ANIMATION_SLIDE_LEFT,
 	OPEN_WINDOW_ANIMATION_SLIDE_RIGHT,
 	OPEN_WINDOW_ANIMATION_SLIDE_IN,
 	OPEN_WINDOW_ANIMATION_SLIDE_OUT,
-	OPEN_WINDOW_ANIMATION_SLIDE_IN_CENTER,
-	OPEN_WINDOW_ANIMATION_SLIDE_OUT_CENTER,
-	OPEN_WINDOW_ANIMATION_ZOOM,
-	OPEN_WINDOW_ANIMATION_MINIMIZE,
-	OPEN_WINDOW_ANIMATION_SQUEEZE,
-	OPEN_WINDOW_ANIMATION_SQUEEZE_BOTTOM,
 	OPEN_WINDOW_ANIMATION_INVALID,
 };
 
@@ -68,6 +61,9 @@ typedef struct win_option_mask {
 	bool opacity : 1;
 	bool clip_shadow_above : 1;
 	enum open_window_animation animation;
+	enum open_window_animation animation_unmap;
+	enum open_window_animation animation_workspace_in;
+	enum open_window_animation animation_workspace_out;
 } win_option_mask_t;
 
 typedef struct win_option {
@@ -80,6 +76,9 @@ typedef struct win_option {
 	double opacity;
 	bool clip_shadow_above;
 	enum open_window_animation animation;
+	enum open_window_animation animation_unmap;
+	enum open_window_animation animation_workspace_in;
+	enum open_window_animation animation_workspace_out;
 } win_option_t;
 
 enum blur_method {
@@ -101,8 +100,8 @@ typedef struct options {
 	/// Render to a separate window instead of taking over the screen
 	bool debug_mode;
 	// === General ===
-	/// Use the legacy backends?
-	bool legacy_backends;
+	/// Use the experimental new backends?
+	bool experimental_backends;
 	/// Path to write PID to.
 	char *write_pid_path;
 	/// The backend in use.
@@ -153,6 +152,10 @@ typedef struct options {
 	win_option_t wintype_option[NUM_WINTYPES];
 
 	// === VSync & software optimization ===
+	/// User-specified refresh rate.
+	int refresh_rate;
+	/// Whether to enable refresh-rate-based software optimization.
+	bool sw_opti;
 	/// VSync method to use;
 	bool vsync;
 	/// Whether to use glFinish() instead of glFlush() for (possibly) better
@@ -160,8 +163,6 @@ typedef struct options {
 	bool vsync_use_glfinish;
 	/// Whether use damage information to help limit the area to paint
 	bool use_damage;
-	/// Disable frame pacing
-	bool no_frame_pacing;
 
 	// === Shadow ===
 	/// Red, green and blue tone of the shadow.
@@ -175,8 +176,8 @@ typedef struct options {
 	c2_lptr_t *shadow_blacklist;
 	/// Whether bounding-shaped window should be ignored.
 	bool shadow_ignore_shaped;
-	/// Whether to crop shadow to the very X RandR monitor.
-	bool crop_shadow_to_monitor;
+	/// Whether to crop shadow to the very Xinerama screen.
+	bool xinerama_shadow_crop;
 	/// Don't draw shadow over these windows. A linked list of conditions.
 	c2_lptr_t *shadow_clip_list;
 
@@ -201,29 +202,31 @@ typedef struct options {
 	enum open_window_animation animation_for_open_window;
 	/// Which animation to run when opening a transient window
 	enum open_window_animation animation_for_transient_window;
-	/// Which animation to run when unmapping a window
+	/// Which animation to run when unmapping (e.g. minimizing) a window
 	enum open_window_animation animation_for_unmap_window;
-	/// Which animation to run when swapping to new tag
-	enum open_window_animation animation_for_next_tag;
-	/// Which animation to run for old tag
-	enum open_window_animation animation_for_prev_tag;
+	/// Which animation to run when switching workspace
+	/// IMPORTANT: will only work if window manager updates
+	/// _NET_CURRENT_DESKTOP before doing the hide/show of windows
+	enum open_window_animation animation_for_workspace_switch_in;
+	enum open_window_animation animation_for_workspace_switch_out;
 	/// Spring stiffness for animation
 	double animation_stiffness;
-	/// Spring stiffness for current tag animation
-	double animation_stiffness_tag_change;
 	/// Window mass for animation
 	double animation_window_mass;
 	/// Animation dampening
 	double animation_dampening;
+	/// Animation delta. In milliseconds.
+	double animation_delta;
+	/// Whether to force animations to not miss a beat
+	bool animation_force_steps;
 	/// Whether to clamp animations
 	bool animation_clamping;
-	/// Animation blacklist. A linked list of conditions.
-	c2_lptr_t *animation_blacklist;
+	/// TODO: window animation blacklist
 	/// TODO: open/close animations
 
 	// === Opacity ===
 	/// Default opacity for inactive windows.
-	/// 32-bit integer with the format of _NET_WM_WINDOW_OPACITY.
+	/// 32-bit integer with the format of _NET_WM_OPACITY.
 	double inactive_opacity;
 	/// Default opacity for inactive windows.
 	double active_opacity;
@@ -233,8 +236,8 @@ typedef struct options {
 	/// Frame opacity. Relative to window opacity, also affects shadow
 	/// opacity.
 	double frame_opacity;
-	/// Whether to detect _NET_WM_WINDOW_OPACITY on client windows. Used on window
-	/// managers that don't pass _NET_WM_WINDOW_OPACITY to frame windows.
+	/// Whether to detect _NET_WM_OPACITY on client windows. Used on window
+	/// managers that don't pass _NET_WM_OPACITY to frame windows.
 	bool detect_client_opacity;
 
 	// === Other window processing ===
@@ -258,10 +261,6 @@ typedef struct options {
 	struct conv **blur_kerns;
 	/// Number of convolution kernels
 	int blur_kernel_count;
-	/// Custom fragment shader for painting windows
-	char *window_shader_fg;
-	/// Rules to change custom fragment shader for painting windows.
-	c2_lptr_t *window_shader_fg_rules;
 	/// How much to dim an inactive window. 0.0 - 1.0, 0 to disable.
 	double inactive_dim;
 	/// Whether to use fixed inactive dim opacity, instead of deciding
@@ -277,8 +276,6 @@ typedef struct options {
 	int corner_radius;
 	/// Rounded corners blacklist. A linked list of conditions.
 	c2_lptr_t *rounded_corners_blacklist;
-	/// Rounded corner rules. A linked list of conditions.
-	c2_lptr_t *corner_radius_rules;
 
 	// === Focus related ===
 	/// Whether to try to detect WM windows and mark them as focused.
@@ -304,18 +301,6 @@ typedef struct options {
 	// Make transparent windows clip other windows, instead of blending on top of
 	// them
 	bool transparent_clipping;
-
-	// Enable fading for next tag
-	bool enable_fading_next_tag;
-
-	// Enable fading for prev tag
-	bool enable_fading_prev_tag;
-
-	/// A list of conditions of windows to which transparent clipping
-	/// should not apply
-	c2_lptr_t *transparent_clipping_blacklist;
-
-	bool dithered_present;
 } options_t;
 
 extern const char *const BACKEND_STRS[NUM_BKEND + 1];
@@ -324,10 +309,7 @@ bool must_use parse_long(const char *, long *);
 bool must_use parse_int(const char *, int *);
 struct conv **must_use parse_blur_kern_lst(const char *, bool *hasneg, int *count);
 bool must_use parse_geometry(session_t *, const char *, region_t *);
-bool must_use parse_numeric_window_rule(c2_lptr_t **, const char *, long, long);
-bool must_use parse_rule_window_shader(c2_lptr_t **, const char *, const char *);
-char *must_use locate_auxiliary_file(const char *scope, const char *path,
-                                     const char *include_dir);
+bool must_use parse_rule_opacity(c2_lptr_t **, const char *);
 enum blur_method must_use parse_blur_method(const char *src);
 enum open_window_animation must_use parse_open_window_animation(const char *src);
 
@@ -337,9 +319,6 @@ enum open_window_animation must_use parse_open_window_animation(const char *src)
 bool condlst_add(c2_lptr_t **, const char *);
 
 #ifdef CONFIG_LIBCONFIG
-const char *xdg_config_home(void);
-char **xdg_config_dirs(void);
-
 /// Parse a configuration file
 /// Returns the actually config_file name used, allocated on heap
 /// Outputs:

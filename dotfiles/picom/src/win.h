@@ -7,9 +7,12 @@
 #include <xcb/render.h>
 #include <xcb/xcb.h>
 
-#include <backend/backend.h>
-
 #include "uthash_extra.h"
+
+// FIXME shouldn't need this
+#ifdef CONFIG_OPENGL
+#include <GL/gl.h>
+#endif
 
 #include "c2.h"
 #include "compiler.h"
@@ -95,19 +98,6 @@ struct win_geometry {
 	uint16_t border_width;
 };
 
-enum {
-    // dwm_mask
-    ANIM_PREV_TAG = 1,
-    ANIM_NEXT_TAG = (1 << 1),
-    ANIM_UNMAP = (1 << 2),
-    ANIM_SPECIAL_MINIMIZE = (1 << 3),
-    // animation_is_tag
-    ANIM_IN_TAG = 1,
-    ANIM_SLOW = (1 << 1),
-    ANIM_FAST = (1 << 2),
-    ANIM_FADE = (1 << 3),
-};
-
 struct managed_win {
 	struct win base;
 	/// backend data attached to this window. Only available when
@@ -115,7 +105,6 @@ struct managed_win {
 	void *win_image;
 	void *old_win_image; // Old window image for interpolating window contents during animations
 	void *shadow_image;
-	void *mask_image;
 	/// Pointer to the next higher window to paint.
 	struct managed_win *prev_trans;
 	/// Number of windows above this window
@@ -132,8 +121,8 @@ struct managed_win {
 	struct win_geometry g;
 	/// Updated geometry received in events
 	struct win_geometry pending_g;
-	/// X RandR monitor this window is on.
-	int randr_monitor;
+	/// Xinerama screen this window is on.
+	int xinerama_scr;
 	/// Window visual pict format
 	const xcb_render_pictforminfo_t *pictfmt;
 	/// Client window visual pict format
@@ -151,7 +140,7 @@ struct managed_win {
 	/// bitmap for properties which needs to be updated
 	uint64_t *stale_props;
 	/// number of uint64_ts that has been allocated for stale_props
-	size_t stale_props_capacity;
+	uint64_t stale_props_capacity;
 
 	/// Bounding shape of the window. In local coordinates.
 	/// See above about coordinate systems.
@@ -165,8 +154,6 @@ struct managed_win {
 	/// opacity state, window geometry, window mapped/unmapped state,
 	/// window mode of the windows above. DOES NOT INCLUDE the body of THIS WINDOW.
 	/// NULL means reg_ignore has not been calculated for this window.
-    /// 1 = tag prev  , 2 = tag next, 4 = unmap
-    uint32_t dwm_mask;
 	rc_region_t *reg_ignore;
 	/// Whether the reg_ignore of all windows beneath this window are valid
 	bool reg_ignore_valid;
@@ -184,6 +171,8 @@ struct managed_win {
 	bool unredir_if_possible_excluded;
 	/// Whether this window is in open/close state.
 	bool in_openclose;
+	/// Whether this window was transient when animated on open
+	bool animation_transient;
 	/// Current position and destination, for animation
 	double animation_center_x,      animation_center_y;
 	double animation_dest_center_x, animation_dest_center_y;
@@ -197,11 +186,6 @@ struct managed_win {
 	/// Inverse of the window distance at the start of animation, for
 	/// tracking animation progress
 	double animation_inv_og_distance;
-    /// Animation info if it is a tag change & check if its changing window sizes
-    /// 0: no tag change
-    /// 1: normal tag change animation
-    /// 2: tag change animation that effects window size
-    uint16_t animation_is_tag;
 
 	// Client window related members
 	/// ID of the top-level client window of the window.
@@ -241,8 +225,7 @@ struct managed_win {
 	/// Previous window opacity.
 	double opacity_target_old;
 	/// true if window (or client window, for broken window managers
-	/// not transferring client window's _NET_WM_WINDOW_OPACITY value) has opacity
-	/// prop
+	/// not transferring client window's _NET_WM_OPACITY value) has opacity prop
 	bool has_opacity_prop;
 	/// Cached value of opacity window attribute.
 	opacity_t opacity_prop;
@@ -260,9 +243,6 @@ struct managed_win {
 	switch_t fade_force;
 	/// Whether fading is excluded by the rules. Calculated.
 	bool fade_excluded;
-
-	/// Whether transparent clipping is excluded by the rules.
-	bool transparent_clipping_excluded;
 
 	// Frame-opacity-related members
 	/// Current window frame opacity. Affected by window opacity.
@@ -289,7 +269,7 @@ struct managed_win {
 	paint_t shadow_paint;
 	/// The value of _COMPTON_SHADOW attribute of the window. Below 0 for
 	/// none.
-	long long prop_shadow;
+	long prop_shadow;
 	/// Do not paint shadow over this window.
 	bool clip_shadow_above;
 
@@ -306,9 +286,6 @@ struct managed_win {
 	/// Whether to blur window background.
 	bool blur_background;
 
-	/// The custom window shader to use when rendering.
-	struct shader_info *fg_shader;
-
 #ifdef CONFIG_OPENGL
 	/// Textures and FBO background blur use.
 	glx_blur_cache_t glx_blur_cache;
@@ -321,10 +298,9 @@ struct managed_win {
 /// section
 void win_process_update_flags(session_t *ps, struct managed_win *w);
 void win_process_image_flags(session_t *ps, struct managed_win *w);
-bool win_bind_mask(struct backend_base *b, struct managed_win *w);
 /// Bind a shadow to the window, with color `c` and shadow kernel `kernel`
 bool win_bind_shadow(struct backend_base *b, struct managed_win *w, struct color c,
-                     struct backend_shadow_context *kernel);
+                     struct conv *kernel);
 
 /// Start the unmap of a window. We cannot unmap immediately since we might need to fade
 /// the window out.
@@ -374,9 +350,7 @@ void win_recheck_client(session_t *ps, struct managed_win *w);
  */
 double attr_pure win_calc_opacity_target(session_t *ps, const struct managed_win *w);
 bool attr_pure win_should_dim(session_t *ps, const struct managed_win *w);
-
-void win_update_monitor(struct x_monitors *monitors, struct managed_win *mw);
-
+void win_update_screen(int nscreens, region_t *screens, struct managed_win *w);
 /**
  * Retrieve the bounding shape of a window.
  */
@@ -491,9 +465,6 @@ bool win_check_flags_any(struct managed_win *w, uint64_t flags);
 bool win_check_flags_all(struct managed_win *w, uint64_t flags);
 /// Mark properties as stale for a window
 void win_set_properties_stale(struct managed_win *w, const xcb_atom_t *prop, int nprops);
-
-/// Determine if a window should animate
-bool attr_pure win_should_animate(session_t *ps, const struct managed_win *w);
 
 static inline attr_unused void win_set_property_stale(struct managed_win *w, xcb_atom_t prop) {
 	return win_set_properties_stale(w, (xcb_atom_t[]){prop}, 1);

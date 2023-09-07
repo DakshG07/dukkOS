@@ -23,6 +23,7 @@ in
       htop
       maim
       gpg-tui
+      playerctl
       # GUIs
       firefox
       new.thunderbird
@@ -38,6 +39,8 @@ in
       obs-studio
       inkscape
       rofi
+      xorg.libxcb
+      xorg.xcbutil
       # Bonus editor
       helix
     ];

@@ -21,6 +21,7 @@ myScreenshot  = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
 myVolumeUp    = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
 myVolumeDown  = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
 myVolumeMute  = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+myVolumePause = spawn "playerctl play-pause"
 myBrightUp    = spawn "brightnessctl -d intel_backlight set +10%"
 myBrightDown  = spawn "brightnessctl -d intel_backlight set 10%-"
 myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
@@ -32,6 +33,7 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("<XF86AudioRaiseVolume>", myVolumeUp)
          , ("<XF86AudioLowerVolume>", myVolumeDown)
          , ("<XF86AudioMute>", myVolumeMute)
+         , ("<XF86AudioPlay>", myVolumePause) -- The "Play" button is a Play *and* Pause button
          , ("<XF86MonBrightnessUp>", myBrightUp)
          , ("<XF86MonBrightnessDown>", myBrightDown)
          , ("M-v", withFocused (\w -> windows (W.float w (RationalRect (1/4) (1/4) (1/2) (1/2)))))

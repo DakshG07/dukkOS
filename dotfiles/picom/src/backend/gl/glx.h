@@ -41,7 +41,8 @@ struct glx_fbconfig_criteria {
 	int visual_depth;
 };
 
-struct glx_fbconfig_info *glx_find_fbconfig(struct x_connection *, struct xvisual_info);
+struct glx_fbconfig_info *glx_find_fbconfig(Display *, int screen, struct xvisual_info);
+
 
 struct glxext_info {
 	bool initialized;
@@ -54,7 +55,6 @@ struct glxext_info {
 	bool has_GLX_ARB_create_context;
 	bool has_GLX_EXT_buffer_age;
 	bool has_GLX_MESA_query_renderer;
-	bool has_GLX_ARB_create_context_robustness;
 };
 
 extern struct glxext_info glxext;

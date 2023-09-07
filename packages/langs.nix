@@ -15,6 +15,7 @@ in
     zig.enable = mkEnableOption "Zig";
     c.enable = mkEnableOption "C";
     java.enable = mkEnableOption "Java";
+    python.enable = mkEnableOption "Java";
   };
   # lines 21-26 give me lisp vibes
   config.home = with pkgs; mkMerge [
@@ -24,5 +25,6 @@ in
     (makelang "zig" [zig])
     (makelang "c" [clang-tools gcc])
     (makelang "java" [jdk8 jre8])
+    (makelang "python" [python3])
   ];
 }

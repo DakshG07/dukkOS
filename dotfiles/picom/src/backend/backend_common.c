@@ -19,18 +19,17 @@
 /**
  * Generate a 1x1 <code>Picture</code> of a particular color.
  */
-xcb_render_picture_t
-solid_picture(struct x_connection *c, bool argb, double a, double r, double g, double b) {
+xcb_render_picture_t solid_picture(xcb_connection_t *c, xcb_drawable_t d, bool argb,
+                                   double a, double r, double g, double b) {
 	xcb_pixmap_t pixmap;
 	xcb_render_picture_t picture;
 	xcb_render_create_picture_value_list_t pa;
 	xcb_render_color_t col;
 	xcb_rectangle_t rect;
 
-	pixmap = x_create_pixmap(c, argb ? 32 : 8, 1, 1);
-	if (!pixmap) {
+	pixmap = x_create_pixmap(c, argb ? 32 : 8, d, 1, 1);
+	if (!pixmap)
 		return XCB_NONE;
-	}
 
 	pa.repeat = 1;
 	picture = x_create_picture_with_standard_and_pixmap(
@@ -38,7 +37,7 @@ solid_picture(struct x_connection *c, bool argb, double a, double r, double g, d
 	    XCB_RENDER_CP_REPEAT, &pa);
 
 	if (!picture) {
-		xcb_free_pixmap(c->c, pixmap);
+		xcb_free_pixmap(c, pixmap);
 		return XCB_NONE;
 	}
 
@@ -52,14 +51,14 @@ solid_picture(struct x_connection *c, bool argb, double a, double r, double g, d
 	rect.width = 1;
 	rect.height = 1;
 
-	xcb_render_fill_rectangles(c->c, XCB_RENDER_PICT_OP_SRC, picture, col, 1, &rect);
-	xcb_free_pixmap(c->c, pixmap);
+	xcb_render_fill_rectangles(c, XCB_RENDER_PICT_OP_SRC, picture, col, 1, &rect);
+	xcb_free_pixmap(c, pixmap);
 
 	return picture;
 }
 
-xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opacity,
-                         int width, int height) {
+xcb_image_t *
+make_shadow(xcb_connection_t *c, const conv *kernel, double opacity, int width, int height) {
 	/*
 	 * We classify shadows into 4 kinds of regions
 	 *    r = shadow radius
@@ -85,16 +84,15 @@ xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opac
 	assert(d % 2 == 1);
 	assert(d > 0);
 
-	ximage =
-	    xcb_image_create_native(c->c, to_u16_checked(swidth), to_u16_checked(sheight),
-	                            XCB_IMAGE_FORMAT_Z_PIXMAP, 8, 0, 0, NULL);
+	ximage = xcb_image_create_native(c, to_u16_checked(swidth), to_u16_checked(sheight),
+	                                 XCB_IMAGE_FORMAT_Z_PIXMAP, 8, 0, 0, NULL);
 	if (!ximage) {
 		log_error("failed to create an X image");
 		return 0;
 	}
 
 	unsigned char *data = ximage->data;
-	long long sstride = ximage->stride;
+	long sstride = ximage->stride;
 
 	// If the window body is smaller than the kernel, we do convolution directly
 	if (width < r * 2 && height < r * 2) {
@@ -102,7 +100,7 @@ xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opac
 			for (int x = 0; x < swidth; x++) {
 				double sum = sum_kernel_normalized(
 				    kernel, d - x - 1, d - y - 1, width, height);
-				data[y * sstride + x] = (uint8_t)(sum * 255.0 * opacity);
+				data[y * sstride + x] = (uint8_t)(sum * 255.0);
 			}
 		}
 		return ximage;
@@ -120,14 +118,14 @@ xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opac
 			for (int x = 0; x < r * 2; x++) {
 				double sum = sum_kernel_normalized(kernel, d - x - 1,
 				                                   d - y - 1, d, height) *
-				             255.0 * opacity;
+				             255.0;
 				data[y * sstride + x] = (uint8_t)sum;
 				data[y * sstride + swidth - x - 1] = (uint8_t)sum;
 			}
 		}
 		for (int y = 0; y < sheight; y++) {
-			double sum = sum_kernel_normalized(kernel, 0, d - y - 1, d, height) *
-			             255.0 * opacity;
+			double sum =
+			    sum_kernel_normalized(kernel, 0, d - y - 1, d, height) * 255.0;
 			memset(&data[y * sstride + r * 2], (uint8_t)sum,
 			       (size_t)(width - 2 * r));
 		}
@@ -139,14 +137,14 @@ xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opac
 			for (int x = 0; x < swidth; x++) {
 				double sum = sum_kernel_normalized(kernel, d - x - 1,
 				                                   d - y - 1, width, d) *
-				             255.0 * opacity;
+				             255.0;
 				data[y * sstride + x] = (uint8_t)sum;
 				data[(sheight - y - 1) * sstride + x] = (uint8_t)sum;
 			}
 		}
 		for (int x = 0; x < swidth; x++) {
-			double sum = sum_kernel_normalized(kernel, d - x - 1, 0, width, d) *
-			             255.0 * opacity;
+			double sum =
+			    sum_kernel_normalized(kernel, d - x - 1, 0, width, d) * 255.0;
 			for (int y = r * 2; y < height; y++) {
 				data[y * sstride + x] = (uint8_t)sum;
 			}
@@ -195,7 +193,7 @@ xcb_image_t *make_shadow(struct x_connection *c, const conv *kernel, double opac
 /**
  * Generate shadow <code>Picture</code> for a window.
  */
-bool build_shadow(struct x_connection *c, double opacity, const int width,
+bool build_shadow(xcb_connection_t *c, xcb_drawable_t d, double opacity, const int width,
                   const int height, const conv *kernel, xcb_render_picture_t shadow_pixel,
                   xcb_pixmap_t *pixmap, xcb_render_picture_t *pict) {
 	xcb_image_t *shadow_image = NULL;
@@ -209,9 +207,9 @@ bool build_shadow(struct x_connection *c, double opacity, const int width,
 		return false;
 	}
 
-	shadow_pixmap = x_create_pixmap(c, 8, shadow_image->width, shadow_image->height);
+	shadow_pixmap = x_create_pixmap(c, 8, d, shadow_image->width, shadow_image->height);
 	shadow_pixmap_argb =
-	    x_create_pixmap(c, 32, shadow_image->width, shadow_image->height);
+	    x_create_pixmap(c, 32, d, shadow_image->width, shadow_image->height);
 
 	if (!shadow_pixmap || !shadow_pixmap_argb) {
 		log_error("Failed to create shadow pixmaps");
@@ -227,11 +225,11 @@ bool build_shadow(struct x_connection *c, double opacity, const int width,
 	}
 
 	gc = x_new_id(c);
-	xcb_create_gc(c->c, gc, shadow_pixmap, 0, NULL);
+	xcb_create_gc(c, gc, shadow_pixmap, 0, NULL);
 
 	// We need to make room for protocol metadata in the request. The metadata should
 	// be 24 bytes plus padding, let's be generous and give it 1kb
-	auto maximum_image_size = xcb_get_maximum_request_length(c->c) * 4 - 1024;
+	auto maximum_image_size = xcb_get_maximum_request_length(c) * 4 - 1024;
 	auto maximum_row =
 	    to_u16_checked(clamp(maximum_image_size / shadow_image->stride, 0, UINT16_MAX));
 	if (maximum_row <= 0) {
@@ -250,23 +248,23 @@ bool build_shadow(struct x_connection *c, double opacity, const int width,
 		}
 
 		uint32_t offset = row * shadow_image->stride / sizeof(*shadow_image->data);
-		xcb_put_image(c->c, (uint8_t)shadow_image->format, shadow_pixmap, gc,
+		xcb_put_image(c, (uint8_t)shadow_image->format, shadow_pixmap, gc,
 		              shadow_image->width, batch_height, 0, to_i16_checked(row),
 		              0, shadow_image->depth, shadow_image->stride * batch_height,
 		              shadow_image->data + offset);
 	}
 
-	xcb_render_composite(c->c, XCB_RENDER_PICT_OP_SRC, shadow_pixel, shadow_picture,
+	xcb_render_composite(c, XCB_RENDER_PICT_OP_SRC, shadow_pixel, shadow_picture,
 	                     shadow_picture_argb, 0, 0, 0, 0, 0, 0, shadow_image->width,
 	                     shadow_image->height);
 
 	*pixmap = shadow_pixmap_argb;
 	*pict = shadow_picture_argb;
 
-	xcb_free_gc(c->c, gc);
+	xcb_free_gc(c, gc);
 	xcb_image_destroy(shadow_image);
-	xcb_free_pixmap(c->c, shadow_pixmap);
-	x_free_picture(c, shadow_picture);
+	xcb_free_pixmap(c, shadow_pixmap);
+	xcb_render_free_picture(c, shadow_picture);
 
 	return true;
 
@@ -275,72 +273,42 @@ shadow_picture_err:
 		xcb_image_destroy(shadow_image);
 	}
 	if (shadow_pixmap) {
-		xcb_free_pixmap(c->c, shadow_pixmap);
+		xcb_free_pixmap(c, shadow_pixmap);
 	}
 	if (shadow_pixmap_argb) {
-		xcb_free_pixmap(c->c, shadow_pixmap_argb);
+		xcb_free_pixmap(c, shadow_pixmap_argb);
 	}
 	if (shadow_picture) {
-		x_free_picture(c, shadow_picture);
+		xcb_render_free_picture(c, shadow_picture);
 	}
 	if (shadow_picture_argb) {
-		x_free_picture(c, shadow_picture_argb);
+		xcb_render_free_picture(c, shadow_picture_argb);
 	}
 	if (gc) {
-		xcb_free_gc(c->c, gc);
+		xcb_free_gc(c, gc);
 	}
 
 	return false;
 }
 
-void *default_backend_render_shadow(backend_t *backend_data, int width, int height,
-                                    struct backend_shadow_context *sctx, struct color color) {
-	const conv *kernel = (void *)sctx;
-	xcb_render_picture_t shadow_pixel =
-	    solid_picture(backend_data->c, true, 1, color.red, color.green, color.blue);
-	xcb_pixmap_t shadow = XCB_NONE;
+void *
+default_backend_render_shadow(backend_t *backend_data, int width, int height,
+                              const conv *kernel, double r, double g, double b, double a) {
+	xcb_pixmap_t shadow_pixel = solid_picture(backend_data->c, backend_data->root,
+	                                          true, 1, r, g, b),
+	             shadow = XCB_NONE;
 	xcb_render_picture_t pict = XCB_NONE;
 
-	if (!build_shadow(backend_data->c, color.alpha, width, height, kernel,
+	if (!build_shadow(backend_data->c, backend_data->root, a, width, height, kernel,
 	                  shadow_pixel, &shadow, &pict)) {
-		x_free_picture(backend_data->c, shadow_pixel);
 		return NULL;
 	}
 
 	auto visual = x_get_visual_for_standard(backend_data->c, XCB_PICT_STANDARD_ARGB_32);
 	void *ret = backend_data->ops->bind_pixmap(
 	    backend_data, shadow, x_get_visual_info(backend_data->c, visual), true);
-	x_free_picture(backend_data->c, pict);
-	x_free_picture(backend_data->c, shadow_pixel);
+	xcb_render_free_picture(backend_data->c, pict);
 	return ret;
-}
-
-/// Implement render_shadow with shadow_from_mask
-void *
-backend_render_shadow_from_mask(backend_t *backend_data, int width, int height,
-                                struct backend_shadow_context *sctx, struct color color) {
-	region_t reg;
-	pixman_region32_init_rect(&reg, 0, 0, (unsigned int)width, (unsigned int)height);
-	void *mask = backend_data->ops->make_mask(
-	    backend_data, (geometry_t){.width = width, .height = height}, &reg);
-	pixman_region32_fini(&reg);
-
-	void *shadow = backend_data->ops->shadow_from_mask(backend_data, mask, sctx, color);
-	backend_data->ops->release_image(backend_data, mask);
-	return shadow;
-}
-
-struct backend_shadow_context *
-default_create_shadow_context(backend_t *backend_data attr_unused, double radius) {
-	auto ret =
-	    (struct backend_shadow_context *)gaussian_kernel_autodetect_deviation(radius);
-	sum_kernel_preprocess((conv *)ret);
-	return ret;
-}
-
-void default_destroy_shadow_context(backend_t *backend_data attr_unused,
-                                    struct backend_shadow_context *sctx) {
-	free_conv((conv *)sctx);
 }
 
 static struct conv **generate_box_blur_kernel(struct box_blur_args *args, int *kernel_count) {
@@ -481,10 +449,7 @@ bool default_set_image_property(backend_t *base attr_unused, enum image_properti
 		tex->ewidth = iargs[0];
 		tex->eheight = iargs[1];
 		break;
-	case IMAGE_PROPERTY_CORNER_RADIUS: tex->corner_radius = dargs[0]; break;
 	case IMAGE_PROPERTY_MAX_BRIGHTNESS: tex->max_brightness = dargs[0]; break;
-	case IMAGE_PROPERTY_BORDER_WIDTH: tex->border_width = *(int *)arg; break;
-	case IMAGE_PROPERTY_CUSTOM_SHADER: break;
 	}
 
 	return true;
@@ -503,13 +468,13 @@ struct backend_image *default_new_backend_image(int w, int h) {
 	ret->eheight = h;
 	ret->ewidth = w;
 	ret->color_inverted = false;
-	ret->corner_radius = 0;
 	return ret;
 }
 
 void init_backend_base(struct backend_base *base, session_t *ps) {
-	base->c = &ps->c;
+	base->c = ps->c;
 	base->loop = ps->loop;
+	base->root = ps->root;
 	base->busy = false;
 	base->ops = NULL;
 }

@@ -21,7 +21,7 @@ visual32 = find_32bit_visual(conn)
 
 async def get_client_win_async(wid):
     message = await bus.call(Message(destination='com.github.chjj.compton.'+display,
-        path='/com/github/chjj/compton',
+        path='/',
         interface='com.github.chjj.compton',
         member='win_get',
         signature='us',

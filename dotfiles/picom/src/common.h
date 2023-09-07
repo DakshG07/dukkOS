@@ -36,9 +36,9 @@
 #include <X11/Xlib.h>
 #include <ev.h>
 #include <pixman.h>
+#include <xcb/xproto.h>
 #include <xcb/render.h>
 #include <xcb/sync.h>
-#include <xcb/xproto.h>
 
 #include "uthash_extra.h"
 #ifdef CONFIG_OPENGL
@@ -55,12 +55,11 @@
 #include "backend/driver.h"
 #include "compiler.h"
 #include "config.h"
-#include "list.h"
 #include "region.h"
-#include "render.h"
-#include "statistics.h"
 #include "types.h"
 #include "utils.h"
+#include "list.h"
+#include "render.h"
 #include "win_defs.h"
 #include "x.h"
 
@@ -83,6 +82,11 @@ typedef struct glx_fbconfig glx_fbconfig_t;
 struct glx_session;
 struct atom;
 struct conv;
+
+typedef struct _ignore {
+	struct _ignore *next;
+	unsigned long sequence;
+} ignore_t;
 
 #ifdef CONFIG_OPENGL
 #ifdef DEBUG_GLX_DEBUG_CONTEXT
@@ -126,33 +130,24 @@ typedef struct _latom {
 	struct _latom *next;
 } latom_t;
 
-struct shader_info {
-	char *key;
-	char *source;
-	void *backend_shader;
-	uint64_t attributes;
-	UT_hash_handle hh;
-};
-
 /// Structure containing all necessary data for a session.
 typedef struct session {
 	// === Event handlers ===
 	/// ev_io for X connection
 	ev_io xiow;
-	/// Timer for checking DPMS power level
-	ev_timer dpms_check_timer;
 	/// Timeout for delayed unredirection.
 	ev_timer unredir_timer;
 	/// Timer for fading
 	ev_timer fade_timer;
 	/// Timer for animations
 	ev_timer animation_timer;
+	/// Timer for delayed drawing, right now only used by
+	/// swopti
+	ev_timer delayed_draw_timer;
 	/// Use an ev_idle callback for drawing
 	/// So we only start drawing when events are processed
 	ev_idle draw_idle;
-	/// Use an ev_timer callback for drawing
-	ev_timer draw_timer;
-	/// Called every time we have timeouts or new data on socket,
+	/// Called everytime we have timeouts or new data on socket,
 	/// so we can be sure if xcb read from X socket at anytime during event
 	/// handling, we will not left any event unhandled in the queue
 	ev_prepare event_check;
@@ -160,8 +155,6 @@ typedef struct session {
 	ev_signal usr1_signal;
 	/// Signal handler for SIGINT
 	ev_signal int_signal;
-
-	// === Backend related ===
 	/// backend data
 	backend_t *backend_data;
 	/// backend blur context
@@ -172,18 +165,35 @@ typedef struct session {
 	void *file_watch_handle;
 	/// libev mainloop
 	struct ev_loop *loop;
-	/// Shaders
-	struct shader_info *shaders;
 
 	// === Display related ===
-	/// X connection
-	struct x_connection c;
 	/// Whether the X server is grabbed by us
 	bool server_grabbed;
+	/// Display in use.
+	Display *dpy;
+	/// Previous handler of X errors
+	XErrorHandler previous_xerror_handler;
+	/// Default screen.
+	int scr;
+	/// XCB connection.
+	xcb_connection_t *c;
+	/// Default visual.
+	xcb_visualid_t vis;
+	/// Default depth.
+	int depth;
+	/// Root window.
+	xcb_window_t root;
+	/// Height of root window.
+	int root_height;
 	/// Width of root window.
 	int root_width;
-	int root_height;
-	/// X Composite overlay window.
+	/// Current desktop number of root window
+	int root_desktop_num;
+	/// Desktop switch direction
+	int root_desktop_switch_direction;
+	// Damage of root window.
+	// Damage root_damage;
+	/// X Composite overlay window. Used if <code>--paint-on-overlay</code>.
 	xcb_window_t overlay;
 	/// The target window for debug mode
 	xcb_window_t debug_window;
@@ -216,31 +226,6 @@ typedef struct session {
 	xcb_sync_fence_t sync_fence;
 	/// Whether we are rendering the first frame after screen is redirected
 	bool first_frame;
-	/// Whether screen has been turned off
-	bool screen_is_off;
-	/// Event context for X Present extension.
-	uint32_t present_event_id;
-	xcb_special_event_t *present_event;
-	/// When last MSC event happened, in useconds.
-	uint64_t last_msc_instant;
-	/// The last MSC number
-	uint64_t last_msc;
-	/// When the currently rendered frame will be displayed.
-	/// 0 means there is no pending frame.
-	uint64_t target_msc;
-	/// The delay between when the last frame was scheduled to be rendered, and when
-	/// the render actually started.
-	uint64_t last_schedule_delay;
-	/// When do we want our next frame to start rendering.
-	uint64_t next_render;
-	/// Did we actually render the last frame. Sometimes redraw will be scheduled only
-	/// to find out nothing has changed. In which case this will be set to false.
-	bool did_render;
-	/// Whether we can perform frame pacing.
-	bool frame_pacing;
-
-	/// Render statistics
-	struct render_statistics render_stats;
 
 	// === Operation related ===
 	/// Flags related to the root window
@@ -252,7 +237,7 @@ typedef struct session {
 	/// Whether we need to redraw the screen
 	bool redraw_needed;
 
-	/// Cache a xfixes region so we don't need to allocate it every time.
+	/// Cache a xfixes region so we don't need to allocate it everytime.
 	/// A workaround for yshui/picom#301
 	xcb_xfixes_region_t damaged_region;
 	/// The region needs to painted on next paint.
@@ -266,22 +251,22 @@ typedef struct session {
 	/// Pre-generated alpha pictures.
 	xcb_render_picture_t *alpha_picts;
 	/// Time of last fading. In milliseconds.
-	long long fade_time;
+	long fade_time;
 	/// Time of last window animation step. In milliseconds.
-	long animation_time; // TODO(dccsillag) turn into `long long`, like fade_time
+	long animation_time;
 	/// Head pointer of the error ignore linked list.
-	pending_reply_t *pending_reply_head;
+	ignore_t *ignore_head;
 	/// Pointer to the <code>next</code> member of tail element of the error
 	/// ignore linked list.
-	pending_reply_t **pending_reply_tail;
+	ignore_t **ignore_tail;
 	// Cached blur convolution kernels.
 	struct x_convolution_kernel **blur_kerns_cache;
 	/// If we should quit
-	bool quit : 1;
+	bool quit:1;
 	// TODO(yshui) use separate flags for dfferent kinds of updates so we don't
 	// waste our time.
 	/// Whether there are pending updates, like window creation, etc.
-	bool pending_updates : 1;
+	bool pending_updates:1;
 
 	// === Expose event related ===
 	/// Pointer to an array of <code>XRectangle</code>-s of exposed region.
@@ -314,13 +299,17 @@ typedef struct session {
 	xcb_render_picture_t cshadow_picture;
 	/// 1x1 white Picture.
 	xcb_render_picture_t white_picture;
-	/// Backend shadow context.
-	struct backend_shadow_context *shadow_context;
+	/// Gaussian map of shadow.
+	struct conv *gaussian_map;
 	// for shadow precomputation
 	/// A region in which shadow is not painted on.
 	region_t shadow_exclude_reg;
 
 	// === Software-optimization-related ===
+	/// Currently used refresh rate.
+	int refresh_rate;
+	/// Interval between refresh in nanoseconds.
+	long refresh_intv;
 	/// Nanosecond offset of the first painting.
 	long paint_tm_offset;
 
@@ -349,8 +338,6 @@ typedef struct session {
 	int composite_error;
 	/// Major opcode for X Composite extension.
 	int composite_opcode;
-	/// Whether X DPMS extension exists
-	bool dpms_exists;
 	/// Whether X Shape extension exists.
 	bool shape_exists;
 	/// Event base number for X Shape extension.
@@ -371,8 +358,12 @@ typedef struct session {
 	int glx_event;
 	/// Error base number for X GLX extension.
 	int glx_error;
-	/// Information about monitors.
-	struct x_monitors monitors;
+	/// Whether X Xinerama extension exists.
+	bool xinerama_exists;
+	/// Xinerama screen regions.
+	region_t *xinerama_scr_regs;
+	/// Number of Xinerama screens.
+	int xinerama_nscrs;
 	/// Whether X Sync extension exists.
 	bool xsync_exists;
 	/// Event base number for X Sync extension.
@@ -470,7 +461,7 @@ static inline struct timespec get_time_timespec(void) {
  * Return the painting target window.
  */
 static inline xcb_window_t get_tgt_window(session_t *ps) {
-	return ps->overlay != XCB_NONE ? ps->overlay : ps->c.screen_info->root;
+	return ps->overlay != XCB_NONE ? ps->overlay : ps->root;
 }
 
 /**
@@ -478,6 +469,27 @@ static inline xcb_window_t get_tgt_window(session_t *ps) {
  */
 static inline bool bkend_use_glx(session_t *ps) {
 	return BKEND_GLX == ps->o.backend || BKEND_XR_GLX_HYBRID == ps->o.backend;
+}
+
+static void set_ignore(session_t *ps, unsigned long sequence) {
+	if (ps->o.show_all_xerrors)
+		return;
+
+	auto i = cmalloc(ignore_t);
+	if (!i)
+		return;
+
+	i->sequence = sequence;
+	i->next = 0;
+	*ps->ignore_tail = i;
+	ps->ignore_tail = &i->next;
+}
+
+/**
+ * Ignore X errors caused by given X request.
+ */
+static inline void set_ignore_cookie(session_t *ps, xcb_void_cookie_t cookie) {
+	set_ignore(ps, cookie.sequence);
 }
 
 /**
@@ -490,8 +502,7 @@ static inline bool bkend_use_glx(session_t *ps) {
  */
 static inline bool wid_has_prop(const session_t *ps, xcb_window_t w, xcb_atom_t atom) {
 	auto r = xcb_get_property_reply(
-	    ps->c.c,
-	    xcb_get_property(ps->c.c, 0, w, atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 0), NULL);
+	    ps->c, xcb_get_property(ps->c, 0, w, atom, XCB_GET_PROPERTY_TYPE_ANY, 0, 0), NULL);
 	if (!r) {
 		return false;
 	}
