@@ -20,6 +20,7 @@ in
       wezterm   # Terminal
       # Font
       recursive # Font (not too essential, but used everywhere, so...)
+      (nerdfonts.override {fonts = ["NerdFontsSymbolsOnly"];})
     ];
   };
 }

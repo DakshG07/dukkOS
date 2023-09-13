@@ -42,6 +42,7 @@ vim.keymap.set("n", ">b", "<cmd>BufferLineMoveNext<CR>")     -- Move buffer ->
 vim.keymap.set("n", "<b", "<cmd>BufferLineMovePrev<CR>")     -- Move buffer <-
 vim.keymap.set("n", "<leader>bp", "<cmd>BufferLinePick<CR>") -- Pick buffer
 vim.keymap.set("n", "<leader>c", "<cmd>bdelete<CR>")         -- Close buffer
+vim.keymap.set("n", "<leader>C", "<cmd>bdelete!<CR>")         -- Close buffer
 vim.keymap.set("n", "<leader>hc", "<cmd>noh<CR>")            -- Clear highlight
 -- Telescope
 local builtin = require('telescope.builtin')

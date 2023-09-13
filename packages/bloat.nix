@@ -15,6 +15,8 @@ in
       neofetch
       pfetch
       eww
+      cmatrix
+      cava
     ];
   };
 }

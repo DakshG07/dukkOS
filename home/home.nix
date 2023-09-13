@@ -10,6 +10,7 @@ let
     ../dotfiles/zellij.nix
     ../dotfiles/xmonad.nix
     ../dotfiles/polybar.nix
+    ../dotfiles/cava.nix
     # Packages
     ../packages/core.nix
     ../packages/tools.nix
@@ -37,6 +38,7 @@ in
     zellij.enable = true;
     xmonad.enable = true;
     polybar.enable = true;
+    cava.enable = true;
   };
 
   # Not gonna make an option for this so I'll just put it here
