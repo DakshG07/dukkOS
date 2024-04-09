@@ -43,6 +43,16 @@ in
   # for future reference, the commands are nmtui and nmcli
   # shouldn't have taken me that long to figure that out
   networking.networkmanager.enable = true;
+  
+  # stupid localsend
+  networking.firewall.allowedTCPPorts = [ 80 443 53317 ];
+  # stupid kdeconnect
+  networking.firewall.allowedTCPPortRanges = [
+    { from = 1714; to = 1764; }
+  ];
+  networking.firewall.allowedUDPPortRanges = [
+    { from = 1714; to = 1764; }
+  ];
 
   # "god shed his grace of thee..."
   time.timeZone = "America/New_York";
@@ -65,6 +75,9 @@ in
   # take that, elon
   services.xserver.enable = true;
 
+  programs.kdeconnect.enable = true;
+
+  # so dat do (be kinda cool) man
   services.xserver.displayManager.sddm = {
     enable = true;
     theme = "corners";
@@ -72,6 +85,8 @@ in
       General = { InputMethod = ""; };
     };
   };
+
+  services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
   # i preferred gnome but hyprland didn't (screw xdg-portal-gnome)
   # of course, i don't use hyprland anymore, so...
   services.xserver.desktopManager.plasma5.enable = true;
@@ -86,6 +101,10 @@ in
     layout = "us";
     xkbVariant = "";
   };
+
+  services.xrdp.enable = true;
+  services.xrdp.defaultWindowManager = "startplasma-x11";
+  services.xrdp.openFirewall = true;
 
   # actually never tested if printing works
   services.printing.enable = true;
@@ -169,6 +188,10 @@ in
   # crab cult
   environment.shells = with pkgs; [ nushell ];
 
+  #env var
+
+  environment.sessionVariables.MOZ_USE_XINPUT2 = "1";
+
 
   # oss is cool, don't sue me
   nixpkgs.config.allowUnfree = true;
@@ -191,6 +214,11 @@ in
   # or just use home manager
     sddm-dukk-theme
   ];
+  
+  # less verbose boot log
+  boot.consoleLogLevel = 3;
+  boot.kernelParams = [ "quiet" "udev.log_priority=3" "fbcon=vc:2-6" "console=tty0" ];
+  boot.loader.grub.extraConfig = "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet loglevel=3 vga=current\"";
 
 
 

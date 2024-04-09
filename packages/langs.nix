@@ -15,16 +15,18 @@ in
     zig.enable = mkEnableOption "Zig";
     c.enable = mkEnableOption "C";
     java.enable = mkEnableOption "Java";
-    python.enable = mkEnableOption "Java";
+    python.enable = mkEnableOption "Python";
+    flutter.enable = mkEnableOption "Flutter";
   };
   # lines 21-26 give me lisp vibes
   config.home = with pkgs; mkMerge [
     (makelang "haskell" [ghc stack])
     (makelang "rust" [rustup])
-    (makelang "node" [nodejs])
+    (makelang "node" [nodejs nodePackages.pnpm])
     (makelang "zig" [zig])
     (makelang "c" [clang-tools gcc])
-    (makelang "java" [jdk8 jre8])
+    (makelang "java" [jre jdk])
     (makelang "python" [python3])
+    (makelang "flutter" [vscode flutter android-studio android-tools])
   ];
 }

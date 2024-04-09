@@ -6,7 +6,7 @@ with lib; let
 in
 {
   options.packages.bloat = {
-    enable = mkEnableOption "Haskell";
+    enable = mkEnableOption "Bloat";
   };
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
@@ -14,9 +14,10 @@ in
       polybar
       neofetch
       pfetch
-      eww
       cmatrix
+      cbonsai
       cava
+      cloudflare-warp
     ];
   };
 }

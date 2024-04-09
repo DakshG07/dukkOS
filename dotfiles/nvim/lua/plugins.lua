@@ -138,11 +138,18 @@ local plugins =  {
     end
   },
   {
+    'nvim-telescope/telescope-fzf-native.nvim',
+    build = 'make'
+  },
+  {
     'nvim-telescope/telescope.nvim',
     tag = '0.1.0',
     dependencies = {
       'nvim-lua/plenary.nvim'
     },
+    config = function()
+      require('telescope').load_extension('fzf')
+    end,
   },
   {
     'folke/which-key.nvim',

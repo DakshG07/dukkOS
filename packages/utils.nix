@@ -6,7 +6,7 @@ with lib; let
 in
 {
   options.packages.utils = {
-    enable = mkEnableOption "Haskell";
+    enable = mkEnableOption "Utils";
   };
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
@@ -19,6 +19,7 @@ in
       unzip
       xclip
       dconf
+      localsend
     ];
   };
 }

@@ -65,6 +65,8 @@ in
       zig.enable = true;
       c.enable = true;
       python.enable = true;
+      java.enable = true;
+      flutter.enable = false;
     };
   };
 

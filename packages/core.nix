@@ -6,7 +6,7 @@ with lib; let
 in
 {
   options.packages.core = {
-    enable = mkEnableOption "Haskell";
+    enable = mkEnableOption "Core";
   };
   config = mkIf cfg.enable {
     home.packages = with pkgs; [

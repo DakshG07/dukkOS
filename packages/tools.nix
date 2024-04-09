@@ -6,7 +6,7 @@ with lib; let
 in
 {
   options.packages.tools = {
-    enable = mkEnableOption "Haskell";
+    enable = mkEnableOption "Tools";
   };
   config = mkIf cfg.enable {
     home.packages = with pkgs; [
@@ -18,29 +18,34 @@ in
       fzf
       gnupg
       pinentry-qt
-      zellij
-      hyperfine
       htop
       maim
       gpg-tui
       playerctl
       # GUIs
-      firefox
+      new.firefox
       new.thunderbird
       obsidian
       dunst
       blueman
       gnome.nautilus
-      audacity
-      vlc
-      kdenlive
+      #audacity
+      #vlc
+      #kdenlive
+      #blender
       new.vivaldi
-      gparted
-      obs-studio
-      inkscape
+      #gparted
+      #obs-studio
+      #inkscape
       rofi
       xorg.libxcb
       xorg.xcbutil
+      glaxnimate
+      cmake
+      gnumake
+      ninja
+      tldr
+      new.floorp
       # Bonus editor
       helix
     ];
