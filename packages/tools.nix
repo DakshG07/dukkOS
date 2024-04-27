@@ -24,8 +24,8 @@ in
       playerctl
       # GUIs
       new.firefox
-      new.thunderbird
-      obsidian
+      #new.thunderbird
+      #obsidian
       dunst
       blueman
       gnome.nautilus
@@ -33,7 +33,7 @@ in
       #vlc
       #kdenlive
       #blender
-      new.vivaldi
+      #new.vivaldi
       #gparted
       #obs-studio
       #inkscape
@@ -46,6 +46,7 @@ in
       ninja
       tldr
       new.floorp
+      zellij
       # Bonus editor
       helix
     ];

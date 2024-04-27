@@ -11,6 +11,7 @@ let
     ../dotfiles/xmonad.nix
     ../dotfiles/polybar.nix
     ../dotfiles/cava.nix
+    ../dotfiles/floorp.nix
     # Packages
     ../packages/core.nix
     ../packages/tools.nix
@@ -39,6 +40,7 @@ in
     xmonad.enable = true;
     polybar.enable = true;
     cava.enable = true;
+    floorp.enable = true;
   };
 
   # Not gonna make an option for this so I'll just put it here

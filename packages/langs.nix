@@ -22,7 +22,7 @@ in
   config.home = with pkgs; mkMerge [
     (makelang "haskell" [ghc stack])
     (makelang "rust" [rustup])
-    (makelang "node" [nodejs nodePackages.pnpm])
+    (makelang "node" [new.nodejs new.nodePackages.pnpm])
     (makelang "zig" [zig])
     (makelang "c" [clang-tools gcc])
     (makelang "java" [jre jdk])

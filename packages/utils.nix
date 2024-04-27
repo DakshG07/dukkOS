@@ -20,6 +20,9 @@ in
       xclip
       dconf
       localsend
+      ngrok
+      cloudflared
+      librepcb
     ];
   };
 }

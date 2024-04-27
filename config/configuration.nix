@@ -5,6 +5,8 @@
 let 
   sddm-dukk-theme = pkgs.callPackage ../dotfiles/sddm.nix {};
   dukk-picom = pkgs.callPackage ../dotfiles/picom.nix {};
+  ## shhh
+  secrets = import ./secret.nix;
 in
 {
   imports =
@@ -45,7 +47,7 @@ in
   networking.networkmanager.enable = true;
   
   # stupid localsend
-  networking.firewall.allowedTCPPorts = [ 80 443 53317 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 53317 3389 ];
   # stupid kdeconnect
   networking.firewall.allowedTCPPortRanges = [
     { from = 1714; to = 1764; }
@@ -54,7 +56,7 @@ in
     { from = 1714; to = 1764; }
   ];
 
-  # "god shed his grace of thee..."
+  # "oh say can you see"
   time.timeZone = "America/New_York";
 
   # select internationalisation properties...?
@@ -154,22 +156,16 @@ in
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
   systemd = {
-    # *delaying boot so that you can see the startup screen for longer*
-    # *failing to even make a systemd service work*
-    # maybe i should use void instead
-    #services.sweetDreams = {
-      #enable = true;
-      #description = "Sweet Dreams";
-      #wantedBy = [ "multi-user.target" ];
-      #before = [ "sddm.service" ];
-      #serviceConfig = {
-        #Type = "simple";
-        #ExecStart = "${pkgs.bash} /home/dukk/sweetdreams.sh";
-        #Restart = "always";
-        #RestartSec = 10;
-        #TimeoutStopSec = 20;
-      #};
-    #};
+    services.rdptunnel = {
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network.target" ];
+      description = "Set up RDP tunneling through Ngrok.";
+      serviceConfig = {
+        Type = "exec";
+        ExecStart = ''${pkgs.ngrok}/bin/ngrok tcp 3389'';
+        User = "dukk";
+      };
+    };
     user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = [ "graphical-session.target" ];
@@ -213,6 +209,7 @@ in
   #  wget
   # or just use home manager
     sddm-dukk-theme
+    ngrok
   ];
   
   # less verbose boot log
