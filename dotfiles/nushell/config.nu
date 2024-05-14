@@ -193,9 +193,6 @@ $env.config = {
   rm: {
     always_trash: false # always act as if -t was given. Can be overridden with -p
   }
-  cd: {
-    abbreviations: false # allows `cd s/o/f` to expand to `cd some/other/folder`
-  }
   table: {
     mode: rounded # basic, compact, compact_double, light, thin, with_love, rounded, reinforced, heavy, none, other
     index_mode: always # "always" show indexes, "never" show indexes, "auto" = show indexes when a table has "index" column
@@ -302,9 +299,7 @@ $env.config = {
 
   hooks: {
     pre_prompt: [{||
-      let direnv = (direnv export json | from json)
-      let direnv = if ($direnv | length) == 1 { $direnv } else { {} }
-      $direnv | load-env
+      null
     }]
     pre_execution: [{||
       null  # replace with source code to run before the repl input is run
@@ -551,4 +546,13 @@ alias lg = lazygit
 alias getvolume = wpctl get-volume @DEFAULT_AUDIO_SINK@
 alias momhomemanageriscomplainingaboutgtkrcagain = rm -rf ~/.gtkrc-2.0
 $env.EDITOR = 'nvim'
+$env.config.hooks.pre_prompt = (
+  $env.config.hooks.pre_prompt | append ({ ||
+    if (which direnv | is-empty) {
+        return
+    }
+
+    direnv export json | from json | default {} | load-env
+  })
+)
 pfetch

@@ -29,6 +29,10 @@ in
   # ntfs support is a joke
   boot.supportedFilesystems = [ "ntfs" ];
   networking.hostName = "nixos"; # too lazy to change this
+  networking.nameservers = [ "1.1.1.1" "8.8.8.8" ];
+  networking.extraHosts = ''
+    104.16.30.34 registry.npmjs.org
+  '';
 
   # bluetooth works #LinuxGoals
   hardware.bluetooth.enable = true;
@@ -80,7 +84,9 @@ in
   programs.kdeconnect.enable = true;
 
   # so dat do (be kinda cool) man
-  services.xserver.displayManager.sddm = {
+  services.displayManager.sddm = {
+    package = pkgs.lib.mkForce pkgs.libsForQt5.sddm;
+    extraPackages = pkgs.lib.mkForce [ pkgs.libsForQt5.qt5.qtgraphicaleffects ];
     enable = true;
     theme = "corners";
     settings = {
@@ -91,7 +97,10 @@ in
   services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
   # i preferred gnome but hyprland didn't (screw xdg-portal-gnome)
   # of course, i don't use hyprland anymore, so...
-  services.xserver.desktopManager.plasma5.enable = true;
+  services.desktopManager.plasma6= {
+    enable = true;
+    enableQt5Integration = true;
+  };
   # trying something new
   services.xserver.windowManager.xmonad = {
     enable = true;
@@ -100,8 +109,8 @@ in
 
   # keys
   services.xserver = {
-    layout = "us";
-    xkbVariant = "";
+    xkb.layout = "us";
+    xkb.variant = "";
   };
 
   services.xrdp.enable = true;
@@ -135,7 +144,7 @@ in
   users.users.dukk = {
     isNormalUser = true;
     description = "Daksh Gupta";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "docker" ];
     packages = with pkgs; [];
     shell = pkgs.nushell;
   };
@@ -187,6 +196,9 @@ in
   #env var
 
   environment.sessionVariables.MOZ_USE_XINPUT2 = "1";
+
+  # ship boat
+  virtualisation.docker.enable = true;
 
 
   # oss is cool, don't sue me

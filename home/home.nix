@@ -51,7 +51,7 @@ in
   # Maybe now gpg-agent will work
   services.gpg-agent = {
     enable = true;
-    pinentryFlavor = "qt";
+    pinentryPackage = pkgs.pinentry-qt;
   };
 
   # Packages

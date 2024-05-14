@@ -24,14 +24,14 @@ in
       playerctl
       # GUIs
       new.firefox
-      #new.thunderbird
-      #obsidian
+      new.thunderbird
+      obsidian
       dunst
       blueman
       gnome.nautilus
       #audacity
       #vlc
-      #kdenlive
+      #kdePackages.kdenlive
       #blender
       #new.vivaldi
       #gparted
@@ -40,13 +40,14 @@ in
       rofi
       xorg.libxcb
       xorg.xcbutil
-      glaxnimate
+      ##glaxnimate
       cmake
       gnumake
-      ninja
-      tldr
+      #ninja
+      #tldr
       new.floorp
       zellij
+      docker
       # Bonus editor
       helix
     ];

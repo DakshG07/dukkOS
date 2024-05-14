@@ -49,7 +49,7 @@ return {
 	hide_tab_bar_if_only_one_tab = true,
 	tab_max_width = 32,
 	-- window
-	window_decorations = "RESIZE",
+	--window_decorations = "TITLE | RESIZE",
 	window_padding = {
 		left = 4,
 		right = 4,
