@@ -21,11 +21,6 @@ in
     systemd-boot.enable = true;
     efi.canTouchEfiVariables = true;
   };
-  boot.plymouth = {
-    enable = true;
-    theme = "rings";
-    themePackages = [(pkgs.adi1090x-plymouth-themes.override {selected_themes = ["rings"];})];
-  };
   # ntfs support is a joke
   boot.supportedFilesystems = [ "ntfs" ];
   networking.hostName = "nixos"; # too lazy to change this
@@ -149,32 +144,7 @@ in
     shell = pkgs.nushell;
   };
 
-  # Nvidia drivers :/
-  hardware.nvidia = {
-
-    # something for wayland idk
-    modesetting.enable = true;
-
-    # who am i, richard stallman?
-    open = false;
-
-    # why not
-    nvidiaSettings = true;
-
-    # hope this works
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
   systemd = {
-    services.rdptunnel = {
-      wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
-      description = "Set up RDP tunneling through Ngrok.";
-      serviceConfig = {
-        Type = "exec";
-        ExecStart = ''${pkgs.ngrok}/bin/ngrok tcp 3389'';
-        User = "dukk";
-      };
-    };
     user.services.polkit-gnome-authentication-agent-1 = {
       description = "polkit-gnome-authentication-agent-1";
       wantedBy = [ "graphical-session.target" ];
@@ -224,10 +194,6 @@ in
     ngrok
   ];
   
-  # less verbose boot log
-  boot.consoleLogLevel = 3;
-  boot.kernelParams = [ "quiet" "udev.log_priority=3" "fbcon=vc:2-6" "console=tty0" ];
-  boot.loader.grub.extraConfig = "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet loglevel=3 vga=current\"";
 
 
 
