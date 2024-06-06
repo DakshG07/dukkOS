@@ -50,6 +50,7 @@ in
       docker
       bottles
       autorandr
+      yazi
       # Bonus editor
       helix
     ];

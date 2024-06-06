@@ -15,7 +15,7 @@ import XMonad.Operations hiding (float)
 
 myModMask     = mod4Mask
 myTerminal    = "wezterm"
-myFileManager = "nautilus"
+myFileManager = "wezterm start -- nu -e \"yazi;exit\""
 myWorkspaces  = show <$> [1,2,3,4,5,6,7,8,9]
 myScreenshot  = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
 myVolumeUp    = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"

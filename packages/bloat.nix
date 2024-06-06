@@ -17,6 +17,7 @@ in
       cmatrix
       cbonsai
       cava
+      cider
       cloudflare-warp
       zoom-us
     ];
