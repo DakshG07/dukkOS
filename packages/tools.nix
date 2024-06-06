@@ -31,7 +31,7 @@ in
       gnome.nautilus
       #audacity
       #vlc
-      #kdePackages.kdenlive
+      kdePackages.kdenlive
       #blender
       #new.vivaldi
       #gparted
@@ -40,7 +40,7 @@ in
       rofi
       xorg.libxcb
       xorg.xcbutil
-      ##glaxnimate
+      glaxnimate
       cmake
       gnumake
       #ninja
@@ -48,6 +48,8 @@ in
       new.floorp
       zellij
       docker
+      bottles
+      autorandr
       # Bonus editor
       helix
     ];

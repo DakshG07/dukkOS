@@ -18,6 +18,7 @@ in
       cbonsai
       cava
       cloudflare-warp
+      zoom-us
     ];
   };
 }

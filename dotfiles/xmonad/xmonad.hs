@@ -62,7 +62,9 @@ myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spac
 
 myStartup :: X ()
 myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
-    [ "feh --bg-scale ~/.nix/wallpaper.png"
+    -- These tasks must be run sychronously
+    [ "autorandr --change && feh --bg-scale ~/.nix/wallpaper.png && polybar -q --reload extra"
+    , "feh --bg-scale ~/.nix/wallpaper.png"
     , "picom --config ~/.nix/dotfiles/picom/picom.conf"
     , "polybar -q --reload main"
     , "polybar -q --reload monitor"
