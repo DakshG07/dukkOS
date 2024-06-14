@@ -23,6 +23,7 @@ in
       ngrok
       cloudflared
       librepcb
+      wofi
     ];
   };
 }

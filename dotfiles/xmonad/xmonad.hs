@@ -55,6 +55,7 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
                                            , ("S-", windows . W.shift)
                                            , ("C-", windows . W.greedyView)]
          ]
+
 -- whilst it's suggested to use avoidStruts AFTER applying any screen gaps,
 -- we disregard this since we intend for there to be an extra gap at the top (between the bar)
 myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spacingRaw True (Border 0 0 0 0) False (Border 10 10 10 10) True $ tiled ||| Mirror tiled ||| spiral (4/3) ||| Full

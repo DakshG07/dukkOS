@@ -90,17 +90,18 @@ in
   };
 
   services.xserver.videoDrivers = [ "displaylink" "modesetting" ];
-  # i preferred gnome but hyprland didn't (screw xdg-portal-gnome)
-  # of course, i don't use hyprland anymore, so...
+  # i don't prefer gnome anymore
   services.desktopManager.plasma6= {
     enable = true;
     enableQt5Integration = true;
   };
-  # trying something new
+  # tried something new
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
   };
+  # back to wayland?
+  programs.niri.enable = true;
 
   # keys
   services.xserver = {

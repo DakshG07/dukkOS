@@ -16,11 +16,12 @@
       url = "github:DakshG07/chill-mp";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    niri.url = "github:sodiboo/niri-flake";
   };
 
   description = "A very basic flake";
 
-  outputs = { self, nixpkgs, newpkgs, home-manager, catppuccinifier, chill-mp, ... }@attrs:
+  outputs = { self, nixpkgs, newpkgs, home-manager, catppuccinifier, chill-mp, niri, ... }@attrs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -29,6 +30,7 @@
         system = "x86_64-linux";
         specialArgs = attrs;
         modules = [ 
+          niri.nixosModules.niri
           ./config/configuration.nix
           home-manager.nixosModules.home-manager
           ({config, ...}:{

@@ -13,6 +13,7 @@ let
     ../dotfiles/cava.nix
     ../dotfiles/floorp.nix
     ../dotfiles/ncmpcpp.nix
+    ../dotfiles/niri.nix
     # Packages
     ../packages/core.nix
     ../packages/tools.nix
@@ -43,6 +44,7 @@ in
     cava.enable = true;
     floorp.enable = true;
     ncmpcpp.enable = true;
+    niri.enable = true;
   };
 
   # Not gonna make an option for this so I'll just put it here
@@ -104,6 +106,9 @@ in
       nodePackages.typescript-language-server
     ];
   };
+
+  # Niri
+  programs.niri.config = null; # We want to manage config ourselves via symlink
 
   # GTK
   gtk = {
