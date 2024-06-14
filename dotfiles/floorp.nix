@@ -4,7 +4,7 @@ with lib; let
   link = config.lib.file.mkOutOfStoreSymlink;
 in {
   options.dotfiles.floorp = {
-    enable = mkEnableOption "Zellij";
+    enable = mkEnableOption "Floorp";
   };
 
   config = mkIf cfg.enable {

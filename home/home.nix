@@ -1,4 +1,4 @@
-{ config, pkgs, lib, catppuccinifier, newpkgs, system, ... }:
+{ config, pkgs, lib, catppuccinifier, chill-mp, newpkgs, system, ... }:
 
 let
   imports = [
@@ -12,6 +12,7 @@ let
     ../dotfiles/polybar.nix
     ../dotfiles/cava.nix
     ../dotfiles/floorp.nix
+    ../dotfiles/ncmpcpp.nix
     # Packages
     ../packages/core.nix
     ../packages/tools.nix
@@ -41,11 +42,13 @@ in
     polybar.enable = true;
     cava.enable = true;
     floorp.enable = true;
+    ncmpcpp.enable = true;
   };
 
   # Not gonna make an option for this so I'll just put it here
   home.packages = [
     catppuccinifier.packages.${pkgs.system}.cli
+    chill-mp.packages.${pkgs.system}.default
   ];
 
   # Maybe now gpg-agent will work
@@ -87,6 +90,9 @@ in
     enable = true;
     defaultEditor = true;
 
+    # Always use the latest version
+    package = new.neovim-unwrapped;
+
     viAlias = true;
     vimAlias = true;
 
@@ -111,6 +117,23 @@ in
         variant = "mocha";
       };
     };
+  };
+  # MPD
+  services.mpd = {
+    enable = true;
+    musicDirectory = "/home/dukk/Music";
+    extraConfig = ''
+      audio_output {
+        type            "alsa"
+        name            "My ALSA"
+        mixer_type      "hardware"
+        mixer_device    "default"
+        mixer_control   "PCM"
+      }
+    '';
+
+    # Optional:
+    network.listenAddress = "any"; # if you want to allow non-localhost connections
   };
 
   # Let Home Manager install and manage itself.

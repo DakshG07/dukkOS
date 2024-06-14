@@ -115,8 +115,8 @@ in
   # actually never tested if printing works
   services.printing.enable = true;
 
-  # sound? on linux? #LinuxGoals
-  sound.enable = true;
+  # ok this line might just be my favorite
+  sound.enable = true; # just like that, plain and simple
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -131,6 +131,7 @@ in
     # no need to redefine it in your config for now)
     #media-session.enable = true;
   };
+
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;

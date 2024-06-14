@@ -12,11 +12,15 @@
       url = "github:DakshG07/catppuccinifier";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    chill-mp = {
+      url = "github:DakshG07/chill-mp";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   description = "A very basic flake";
 
-  outputs = { self, nixpkgs, newpkgs, home-manager, catppuccinifier, ... }@attrs:
+  outputs = { self, nixpkgs, newpkgs, home-manager, catppuccinifier, chill-mp, ... }@attrs:
     let
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
@@ -31,7 +35,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
-              inherit (attrs) nixpkgs catppuccinifier newpkgs;
+              inherit (attrs) nixpkgs catppuccinifier chill-mp newpkgs;
               inherit system;
               flakePath = "/home/dukk/.nix";
             };

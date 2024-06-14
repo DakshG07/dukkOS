@@ -51,6 +51,9 @@ in
       bottles
       autorandr
       yazi
+      mpc-cli
+      pavucontrol
+      easyeffects
       # Bonus editor
       helix
     ];

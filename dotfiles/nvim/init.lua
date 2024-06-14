@@ -32,6 +32,7 @@ vim.o.tabstop = 2
 vim.o.softtabstop = 0
 vim.o.expandtab = true
 pcall(require, "plugins")
+vim.lsp.inlay_hint.enable(true)
 -- Colorscheme
 vim.g.catppuccin_flavour = "mocha"
 vim.cmd.colorscheme "catppuccin"
@@ -57,7 +58,7 @@ vim.keymap.set('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
 vim.keymap.set('n', '<leader>hd', '<cmd>Lspsaga hover_doc<CR>')
 vim.keymap.set('n', '<leader>lr', '<cmd>Lspsaga rename<CR>')
 -- Trouble
-vim.keymap.set('n', '<leader>td', '<cmd>TroubleToggle<CR>')
+vim.keymap.set('n', '<leader>td', '<cmd>Trouble diagnostics toggle<CR>')
 -- NvimTree
 vim.keymap.set('n', '<leader>tt', '<cmd>NvimTreeFocus<CR>') -- Focus tree
 vim.keymap.set('n', '<leader>st', function() require('nvim-tree.api').tree.toggle(false, true) end) -- Show tree

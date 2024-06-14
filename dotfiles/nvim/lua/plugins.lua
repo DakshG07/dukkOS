@@ -39,13 +39,30 @@ local plugins =  {
       local lsp = require('lsp-zero')
       local lspconfig = require('lspconfig')
       lsp.preset('lsp-compe')
+      local enableInlay = function (client, bufnr)
+        vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+      end
       lspconfig.lua_ls.setup(lsp.nvim_lua_ls())
       lspconfig.rust_analyzer.setup({
-        inlayHints = {
-          typeHints = {
-            enable = true
-          }
-        }
+        on_attach = enableInlay,
+        settings = {
+          ["rust-analyzer"] = {
+            imports = {
+              granularity = {
+                group = "module",
+              },
+              prefix = "self",
+            },
+            cargo = {
+              buildScripts = {
+                enable = true,
+              },
+            },
+            procMacro = {
+              enable = true
+            },
+          },
+        },
       })
       lsp.on_attach(function(client, bufnr)
         lsp.default_keymaps({buffer = bufnr})
@@ -77,10 +94,25 @@ local plugins =  {
           { name = 'luasnip', keyword_length = 2 },
         },
         mapping = {
+          ['<tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_next_item()
+            else
+              fallback()
+            end
+          end),
+          ['<S-tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+              cmp.select_prev_item()
+            else
+              fallback()
+            end
+          end),
           ['<CR>'] = cmp.mapping.confirm({select = false}),
         }
       })
       cmp.setup(cmp_config)
+      require('mason').setup()
     end,
   },
   {
@@ -192,18 +224,18 @@ local plugins =  {
   {
     'lukas-reineke/indent-blankline.nvim',
     config = function()
-      require('indent_blankline').setup({
-        -- Show current context
-        show_current_context = true,
-        show_current_context_start = true,
-        char_highlight_list = {
-          "IndentBlanklineIndent1",
-          "IndentBlanklineIndent2",
-          "IndentBlanklineIndent3",
-          "IndentBlanklineIndent4",
-          "IndentBlanklineIndent5",
-          "IndentBlanklineIndent6",
-        },
+      require('ibl').setup({
+        indent = {
+          char = "▏",
+          highlight = {
+            "IndentBlanklineIndent1",
+            "IndentBlanklineIndent2",
+            "IndentBlanklineIndent3",
+            "IndentBlanklineIndent4",
+            "IndentBlanklineIndent5",
+            "IndentBlanklineIndent6",
+          },
+        }
       })
     end
   },

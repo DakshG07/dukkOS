@@ -5,6 +5,7 @@ import XMonad.Util.Types
 import XMonad.Layout.Spacing
 import XMonad.Layout.Gaps
 import XMonad.Layout.NoBorders
+import XMonad.Layout.Spiral
 import XMonad.StackSet as W
 import XMonad.Actions.DynamicWorkspaceOrder as DO
 import XMonad.Actions.CycleWS
@@ -21,9 +22,14 @@ myScreenshot  = spawn "maim -s -u | xclip -selection clipboard -t image/png -i"
 myVolumeUp    = spawn "wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"
 myVolumeDown  = spawn "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
 myVolumeMute  = spawn "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-myVolumePause = spawn "playerctl play-pause"
+myVolumePause = spawn "playerctl play-pause || mpc toggle"
+myVolumeNext  = spawn "playerctl next || mpc next"
+myVolumePrev  = spawn "playerctl previous || mpc prev"
+myMiniPlayer  = spawn "wezterm start -- nu -e \"chill-mp;exit\""
+myMusicPlayer = spawn "wezterm start -- nu -e \"ncmpcpp;exit\""
 myBrightUp    = spawn "brightnessctl -d intel_backlight set +10%"
 myBrightDown  = spawn "brightnessctl -d intel_backlight set 10%-"
+myRestart     = spawn "pkill picom ; pkill polybar ; xmonad --recompile && xmonad --restart"
 myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("M-<Return>", spawn myTerminal)       -- Open Terminal
          , ("M-e", spawn myFileManager)
@@ -34,6 +40,11 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          , ("<XF86AudioLowerVolume>", myVolumeDown)
          , ("<XF86AudioMute>", myVolumeMute)
          , ("<XF86AudioPlay>", myVolumePause) -- The "Play" button is a Play *and* Pause button
+         , ("<XF86AudioNext>", myVolumeNext)  -- Next track
+         , ("<XF86AudioPrev>", myVolumePrev)  -- Prev track
+         , ("M-m", myMiniPlayer)             -- Mini Player
+         , ("M-S-m", myMusicPlayer)            -- Music Player
+         , ("M-S-r", myRestart)               -- Rebuild config
          , ("<XF86MonBrightnessUp>", myBrightUp)
          , ("<XF86MonBrightnessDown>", myBrightDown)
          , ("M-v", withFocused (\w -> windows (W.float w (RationalRect (1/4) (1/4) (1/2) (1/2)))))
@@ -46,7 +57,7 @@ myKeys = [ ("M-r", spawn "rofi -show drun")       -- Rofi
          ]
 -- whilst it's suggested to use avoidStruts AFTER applying any screen gaps,
 -- we disregard this since we intend for there to be an extra gap at the top (between the bar)
-myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spacingRaw True (Border 0 0 0 0) False (Border 10 10 10 10) True $ tiled ||| Mirror tiled ||| Full
+myLayout = avoidStruts $ gaps [(R,18),(L,18),(D,18),(U,5)] $ smartBorders $ spacingRaw True (Border 0 0 0 0) False (Border 10 10 10 10) True $ tiled ||| Mirror tiled ||| spiral (4/3) ||| Full
   where
     -- default tiling algorithm partitions the screen into two panes
     tiled   = Tall nmaster delta ratio
@@ -68,6 +79,7 @@ myStartup = foldr (\x xs -> xs >> (spawn x)) (spawn "") -- startup tasks
     , "picom --config ~/.nix/dotfiles/picom/picom.conf"
     , "polybar -q --reload main"
     , "polybar -q --reload monitor"
+    , "sleep 2 && polybar -q --reload alsoextra"
     ]
 
 myLogHook = updatePointer (0.5, 0.5) (0, 0) -- when i change windows, bring my cursor with me!

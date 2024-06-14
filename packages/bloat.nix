@@ -20,6 +20,8 @@ in
       cider
       cloudflare-warp
       zoom-us
+      ncmpcpp
+      miniplayer
     ];
   };
 }

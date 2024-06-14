@@ -83,3 +83,4 @@ $env.NU_PLUGIN_DIRS = [
 
 # Firefox touchscreen scrolling
 $env.MOZ_USE_XINPUT2 = 1
+$env.PF_INFO = "ascii title os kernel uptime pkgs memory"
