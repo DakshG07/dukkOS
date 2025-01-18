@@ -24,6 +24,7 @@ in
       cloudflared
       librepcb
       wofi
+      popsicle
     ];
   };
 }

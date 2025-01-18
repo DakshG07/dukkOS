@@ -2,6 +2,7 @@ theme = "catppuccin_mocha"
 
 [editor]
 bufferline = "multiple"
+line-number = "relative"
 
 [editor.cursor-shape]
 insert = "bar"

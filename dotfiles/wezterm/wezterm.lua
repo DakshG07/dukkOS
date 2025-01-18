@@ -28,7 +28,7 @@ local fonts = {
 	fanta = wezterm.font({
 		family = "Fantasque Sans Mono",
 	}),
-	iosveka = wezterm.font({
+	iosevka = wezterm.font({
 		family = "Iosevka Comfy",
 	}),
 	recursive = wezterm.font({
@@ -42,8 +42,8 @@ local fonts = {
 return {
 	---- rice
 	-- font
-	font = fonts.recursive,
-	font_size = 17.0, -- For dank mono and cascadia code - 18; for monolisa and victor - 16; for iosevka comfy, recursive mono, cartograph cf and fantasque sans mono - 17;
+	font = fonts.iosevka,
+	font_size = 17.0, -- For iosevka comfy, dank mono and cascadia code - 18; for monolisa and victor - 16; for recursive mono, cartograph cf and fantasque sans mono - 17;
 	use_fancy_tab_bar = false,
 	tab_bar_at_bottom = true,
 	hide_tab_bar_if_only_one_tab = true,
@@ -84,4 +84,5 @@ return {
 	},
 	-- Mouse
 	hide_mouse_cursor_when_typing = false,
+  enable_wayland = false,
 }

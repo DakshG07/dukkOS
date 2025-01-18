@@ -22,6 +22,12 @@ in
       zoom-us
       ncmpcpp
       miniplayer
+      libreoffice
+      vesktop
+      iosevka-comfy.comfy
+      iosevka-comfy.comfy-duo
+      new.figma-linux
+      new.papermc
     ];
   };
 }

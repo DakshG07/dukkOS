@@ -34,6 +34,9 @@ local plugins =  {
       -- Snippets
       'L3MON4D3/LuaSnip',
       'rafamadriz/friendly-snippets',
+
+      -- Extra Language Servers
+      'pmizio/typescript-tools.nvim'
     },
     config = function()
       local lsp = require('lsp-zero')
@@ -113,6 +116,7 @@ local plugins =  {
       })
       cmp.setup(cmp_config)
       require('mason').setup()
+      require('typescript-tools').setup {}
     end,
   },
   {
@@ -293,6 +297,10 @@ local plugins =  {
     config = function()
       require('nvim-ts-autotag').setup()
     end,
+  },
+  {
+    "wakatime/vim-wakatime",
+    lazy = false,
   },
 }
 -- Install plugins

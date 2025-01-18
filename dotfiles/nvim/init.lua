@@ -57,6 +57,7 @@ vim.keymap.set('n', '<leader>ld', '<cmd>Lspsaga show_line_diagnostics<CR>')
 vim.keymap.set('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
 vim.keymap.set('n', '<leader>hd', '<cmd>Lspsaga hover_doc<CR>')
 vim.keymap.set('n', '<leader>lr', '<cmd>Lspsaga rename<CR>')
+vim.keymap.set('n', '<leader>gd', '<cmd>Lspsaga goto_definition<CR>')
 -- Trouble
 vim.keymap.set('n', '<leader>td', '<cmd>Trouble diagnostics toggle<CR>')
 -- NvimTree

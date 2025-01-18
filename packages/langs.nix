@@ -27,6 +27,6 @@ in
     (makelang "c" [clang-tools gcc])
     (makelang "java" [jre jdk])
     (makelang "python" [python3])
-    (makelang "flutter" [vscode flutter android-studio android-tools])
+    (makelang "flutter" [vscode flutter android-tools])
   ];
 }

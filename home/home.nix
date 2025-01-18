@@ -13,7 +13,7 @@ let
     ../dotfiles/cava.nix
     ../dotfiles/floorp.nix
     ../dotfiles/ncmpcpp.nix
-    ../dotfiles/niri.nix
+    ../dotfiles/hyprland.nix
     # Packages
     ../packages/core.nix
     ../packages/tools.nix
@@ -44,7 +44,7 @@ in
     cava.enable = true;
     floorp.enable = true;
     ncmpcpp.enable = true;
-    niri.enable = true;
+    hyprland.enable = true;
   };
 
   # Not gonna make an option for this so I'll just put it here
@@ -107,9 +107,6 @@ in
     ];
   };
 
-  # Niri
-  programs.niri.config = null; # We want to manage config ourselves via symlink
-
   # GTK
   gtk = {
     enable = true;
@@ -140,6 +137,9 @@ in
     # Optional:
     network.listenAddress = "any"; # if you want to allow non-localhost connections
   };
+
+  # fonts
+  fonts.fontconfig.enable = true;
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;

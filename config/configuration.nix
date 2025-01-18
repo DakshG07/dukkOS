@@ -1,6 +1,6 @@
 # dukk.nix v7
 
-{ config, pkgs, newpkgs, ... }:
+{ config, pkgs, newpkgs, hyprland, ... }:
 
 let 
   sddm-dukk-theme = pkgs.callPackage ../dotfiles/sddm.nix {};
@@ -100,8 +100,13 @@ in
     enable = true;
     enableContribAndExtras = true;
   };
+  # thing
+  xdg.portal.enable = true;
   # back to wayland?
-  programs.niri.enable = true;
+  programs.hyprland = {
+    enable = true;
+    package = hyprland.packages.${pkgs.system}.hyprland-unwrapped;
+  };
 
   # keys
   services.xserver = {
@@ -114,7 +119,24 @@ in
   services.xrdp.openFirewall = true;
 
   # actually never tested if printing works
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    listenAddresses = [ "*:631" ];
+    allowFrom = [ "all" ];
+    browsing = true;
+    defaultShared = true;
+    openFirewall = true;
+  };
+  services.printing.drivers = [ pkgs.gutenprint pkgs.gutenprintBin ];
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+    publish = {
+      enable = true;
+      userServices = true;
+    };
+  };
 
   # ok this line might just be my favorite
   sound.enable = true; # just like that, plain and simple
@@ -141,7 +163,7 @@ in
   users.users.dukk = {
     isNormalUser = true;
     description = "Daksh Gupta";
-    extraGroups = [ "networkmanager" "wheel" "video" "docker" ];
+    extraGroups = [ "dialout" "networkmanager" "wheel" "video" "docker" ];
     packages = with pkgs; [];
     shell = pkgs.nushell;
   };
@@ -166,7 +188,6 @@ in
   environment.shells = with pkgs; [ nushell ];
 
   #env var
-
   environment.sessionVariables.MOZ_USE_XINPUT2 = "1";
 
   # ship boat
@@ -195,6 +216,9 @@ in
     sddm-dukk-theme
     ngrok
   ];
+
+  # nobody packages fonts for nixos
+  fonts.fontDir.enable = true;
   
 
 

@@ -54,6 +54,9 @@ in
       mpc-cli
       pavucontrol
       easyeffects
+      wdisplays
+      gparted
+      arduino-ide
       # Bonus editor
       helix
     ];
